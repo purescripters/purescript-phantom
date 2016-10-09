@@ -32,7 +32,7 @@ instance showCookie :: Show Cookie where
     ", name: "     <> x.name          <>
     ", path: "     <> x.path          <>
     ", secure: "   <> show x.secure   <>
-    ", value: "    <> x.value         <>
+    ", value: "    <> x.value         <> " " <>
     "}"
 
 type VersionRec =
@@ -53,7 +53,7 @@ instance showVersion :: Show Version where
   show (Version x) =
     "{ major: " <> show x.major <>
     ", minor: " <> show x.minor <>
-    ", patch: " <> show x.patch <>
+    ", patch: " <> show x.patch <> " " <>
     "}"
 
 foreign import isCookiesEnabled :: forall eff. Eff (phantomjs :: PHANTOMJS | eff) Boolean
