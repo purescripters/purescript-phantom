@@ -1,0 +1,27 @@
+{
+  "name": "purescript-phantom",
+  "version": "0.1.0",
+  "description": "Purescript bindings to PhantomJS",
+  "author": "Risto Stevcev",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "output"
+  ],
+  "homepage": "https://github.com/Risto-Stevcev/purescript-phantom#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Risto-Stevcev/purescript-phantom.git"
+  },
+  "dependencies": {
+    "purescript-console": "^1.0.0"
+  },
+  "devDependencies": {
+    "purescript-psci-support": "^1.0.0",
+    "purescript-test-unit": "^9.1.0",
+    "purescript-exitcodes": "^1.0.0",
+    "purescript-enums": "^1.1.0"
+  }
+}
