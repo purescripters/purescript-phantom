@@ -1,13 +1,17 @@
 module Test.PhantomJS.Phantom where
 
-import Prelude (bind, ($), (*>), (<>))
+import Prelude (Unit, bind, ($), (*>), (<>))
 import PhantomJS.Phantom
+import Control.Monad.Free (Free)
+import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Aff.Console (log)
-
-import Test.Unit (describe, it)
+import Control.Monad.Eff.Class (liftEff) as EffClass
+import Test.Unit (TestF, describe, it)
 import Test.Unit.Assert (shouldEqual)
+
+
+liftEff :: forall eff a. Eff eff a -> Aff eff a
+liftEff = EffClass.liftEff
 
 -- | Tests should be run with the purescript docker container
 projectDir :: String
@@ -37,7 +41,7 @@ sampleCookie = Cookie
 
 foreign import isScriptInjected :: forall eff. Eff (phantomjs :: PHANTOMJS | eff) Boolean
 
-
+phantomTests :: forall eff. Free (TestF (phantomjs :: PHANTOMJS | eff)) Unit
 phantomTests = do
   describe "cookiesEnabled" do
     it "should return true by default for isCookiesEnabled" do
@@ -112,5 +116,3 @@ phantomTests = do
 
       isScriptInjectedAfter <- liftEff isScriptInjected
       isScriptInjectedAfter `shouldEqual` true
-
-      log ""

@@ -4,8 +4,8 @@ import Prelude (($), bind)
 import Data.Enum (fromEnum)
 import ExitCodes (ExitCode(Success))
 import PhantomJS.Phantom (exit, PHANTOMJS)
-import Control.Monad.Aff (launchAff, Canceler)
-import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Aff (Aff, launchAff, Canceler)
+import Control.Monad.Eff.Class (liftEff) as EffClass
 import Control.Monad.Aff.AVar (AVAR)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
@@ -15,6 +15,9 @@ import Test.Unit.Assert (assert)
 import Test.Unit.Output.Simple (runTest)
 import Test.PhantomJS.Phantom (phantomTests)
 
+
+liftEff :: forall eff a. Eff eff a -> Aff eff a
+liftEff = EffClass.liftEff
 
 main
   :: forall eff

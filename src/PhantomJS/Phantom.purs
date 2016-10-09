@@ -1,4 +1,21 @@
-module PhantomJS.Phantom where
+module PhantomJS.Phantom
+  ( PHANTOMJS
+  , Cookie(..)
+  , CookieRec
+  , Version(..)
+  , VersionRec
+  , isCookiesEnabled
+  , setCookiesEnabled
+  , cookies
+  , getLibraryPath
+  , setLibraryPath
+  , version
+  , addCookie
+  , clearCookies
+  , deleteCookie
+  , exit
+  , injectJs
+  ) where
 
 import Prelude (class Eq, class Show, Unit, pure, show, map, (>>=), (<<<), (<>), (==), (&&))
 import Control.Monad.Eff (Eff)
