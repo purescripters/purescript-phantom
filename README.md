@@ -12,7 +12,7 @@ Purescript code is pure and total, so most testing is usually a form of document
 
 ## Example
 
-Install `phantomjs-prebuild` from npm, and run `pulp run` or `pulp test` with `--runtime ./node_modules/.bin/phantomjs`
+Install `phantomjs-prebuilt` from npm, and run `pulp run` or `pulp test` with `--runtime ./node_modules/.bin/phantomjs`
 
 ```purescript
 import Prelude ((>>=), bind)
