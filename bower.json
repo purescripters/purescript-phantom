@@ -1,6 +1,5 @@
 {
   "name": "purescript-phantom",
-  "version": "0.1.21",
   "description": "Purescript bindings to PhantomJS",
   "author": "Risto Stevcev",
   "license": "MIT",
