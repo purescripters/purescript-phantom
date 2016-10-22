@@ -16,12 +16,12 @@
     "url": "git://github.com/Risto-Stevcev/purescript-phantom.git"
   },
   "dependencies": {
-    "purescript-console": "^1.0.0"
+    "purescript-console": "^2.0.0"
   },
   "devDependencies": {
-    "purescript-psci-support": "^1.0.0",
-    "purescript-test-unit": "^9.1.0",
-    "purescript-exitcodes": "^1.0.0",
-    "purescript-enums": "^1.1.0"
+    "purescript-psci-support": "^2.0.0",
+    "purescript-test-unit": "^10.0.0",
+    "purescript-exitcodes": "^2.0.0",
+    "purescript-enums": "^2.0.0"
   }
 }
