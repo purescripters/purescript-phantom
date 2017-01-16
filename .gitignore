@@ -5,3 +5,5 @@
 /.psci*
 /src/.webpack.js
 *.tix
+/.psc-ide-port
+/npm-debug.log
