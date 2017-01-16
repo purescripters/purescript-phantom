@@ -3,6 +3,7 @@ module PhantomJS.Page where
 import Prelude
 import Control.Monad.Aff (Aff, makeAff)
 import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Exception (Error)
 import Control.Monad.Eff.Class (liftEff)
 import PhantomJS.Phantom (PHANTOMJS)
 
@@ -43,12 +44,13 @@ createPage = makeAff (\error success -> createPage_ success)
 
 foreign import open_ :: forall e.
   (Page -> Eff e Unit) ->
+  (Error -> Eff e Unit) ->
   Page ->
   URL ->
   Eff e Unit
 
 open :: forall e. Page -> URL -> Aff e Page
-open p url = makeAff (\error success -> open_ success p url)
+open p url = makeAff (\error success -> open_ success error p url)
 
 
 foreign import render_ :: forall e.
@@ -64,19 +66,21 @@ render p filename rs = makeAff (\error success -> render_ success p filename rs)
 
 foreign import injectJs_ :: forall e.
   (Page -> Eff e Unit) ->
+  (Error -> Eff e Unit) ->
   Page ->
   Filename ->
   Eff e Unit
 
 injectJs :: forall e. Page -> Filename -> Aff e Page
-injectJs p filename = makeAff (\error success -> injectJs_ success p filename)
+injectJs p filename = makeAff (\error success -> injectJs_ success error p filename)
 
 
 foreign import evaluate_ :: forall e.
   (Array String -> Eff e Unit) ->
+  (Error -> Eff e Unit) ->
   Page ->
   String ->
   Eff e Unit
 
 evaluate :: forall e. Page -> String -> Aff e (Array String)
-evaluate p fnName = makeAff (\error success -> evaluate_ success p fnName)
+evaluate p fnName = makeAff (\error success -> evaluate_ success error p fnName)

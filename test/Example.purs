@@ -15,11 +15,11 @@ import Data.Either
 -- Some examples of using PhantomJS.Page module.
 -- Run the following in project root...
 --
--- pulp build --include test --main Example --to test/test.js
+-- pulp --watch build --include test --main Example --to examples/test.js
 --
 -- Then change to the test directory and run the file with phantom.
 --
--- cd test
+-- cd examples
 -- phantomjs test.js
 --
 -- You should see the following, and have a pageRendering.jpg file added to the
@@ -27,34 +27,53 @@ import Data.Either
 --
 -- (Right ["This domain is established to be used for illustrative examples in documents. You may use this\n    domain in examples without prior coordination or asking for permission.","More information..."])
 
-main :: forall e. Eff (err :: EXCEPTION, console :: CONSOLE, phantomjs :: PHANTOMJS | e)
-                      (Canceler ( console :: CONSOLE, phantomjs :: PHANTOMJS  | e))
-main = launchAff $ do
+main :: forall t63.
+  Aff
+    ( console :: CONSOLE
+    , phantomjs :: PHANTOMJS
+    | t63
+    )
+    Unit
+main = do
+  a <- attempt $ runPhantom
+  case a of
+    Left err -> do
+      liftEff $ log (show err)
+      liftEff $ exit 0
+    Right val -> pure val
+
+
+runPhantom :: forall t54.
+  Aff
+    ( console :: CONSOLE
+    , phantomjs :: PHANTOMJS
+    | t54
+    )
+    Unit
+runPhantom = do
   --liftEff $ (log "Running scripts...")
   page <- createPage
 
   -- remote file
+  liftEff $ log ("Fetching page...")
+
+  -- Will fail
+  -- open page "http://exampllllllle.com"
   open page "http://example.com"
+  injectJs page "assets/backgroundRed.js"
 
-  -- can also render local documents...
-  -- open page "README.md"
-  --
-  attempt $ injectJs page "assets/backgroundRed.js"
+  -- Will fail
+  -- injectJs page "assets/getParagraphhhhhContent.js"
 
-  -- Handling failures needs some work
-  -- liftEff $
-  --   either (const $ log "Couldn't inject backgroundRed.js")
-  --          (const $ log "backgroundRed.js injected") a
-  --
-  attempt $ injectJs page "assets/getParagraphContent.js"
-  -- liftEff $ either
-  --   (const $ log "Couldn't inject getParagraphContent.js")
-  --   (const $ log "getParagraphContent.js injected") b
-  --
+  injectJs page "assets/getParagraphContent.js"
+
+  -- Will fail
+  -- content <- attempt $ evaluate page "getParagraphhhContent"
+
   content <- attempt $ evaluate page "getParagraphContent"
-  --
+
   liftEff $ log (show content)
-  --
+
   (render page "pageRender.jpg" jpeg)
-  --
+
   liftEff $ exit 0
