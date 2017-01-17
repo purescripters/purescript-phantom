@@ -1,4 +1,16 @@
-module PhantomJS.Page where
+module PhantomJS.Page
+  ( RenderFormat(..)
+  , RenderSettings
+  , jpeg
+  , Page
+  , createPage
+  , hPair
+  , customHeaders
+  , open
+  , render
+  , injectJs
+  , evaluate
+  ) where
 
 import Prelude
 import Control.Monad.Aff (Aff, makeAff)
