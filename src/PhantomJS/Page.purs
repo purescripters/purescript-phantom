@@ -4,8 +4,9 @@ import Prelude
 import Control.Monad.Aff (Aff, makeAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Exception (Error)
-import Control.Monad.Eff.Class (liftEff)
-import PhantomJS.Phantom (PHANTOMJS)
+import Data.Tuple (Tuple(..))
+import Data.StrMap (StrMap, fromFoldable)
+import Data.Foldable (class Foldable)
 
 type URL = String
 type Filename = String
@@ -41,6 +42,22 @@ foreign import createPage_ :: forall e. (Page -> Eff e Unit) -> Eff e Unit
 createPage :: forall e. Aff e Page
 createPage = makeAff (\error success -> createPage_ success)
 
+-- | Just so consumers don't have to impore Tuple themselves...
+hPair :: String -> String -> Tuple String String
+hPair = Tuple
+
+foreign import customHeaders_ :: forall e.
+  (Page -> Eff e Unit) ->
+  (Error -> Eff e Unit) ->
+  Page ->
+  StrMap String ->
+  Eff e Unit
+
+customHeaders :: forall e f. (Foldable f) => Page -> f (Tuple String String) -> Aff e Page
+customHeaders page headers =
+  makeAff (\error success ->
+    customHeaders_ success error page (fromFoldable headers)
+  )
 
 foreign import open_ :: forall e.
   (Page -> Eff e Unit) ->
@@ -75,12 +92,12 @@ injectJs :: forall e. Page -> Filename -> Aff e Page
 injectJs p filename = makeAff (\error success -> injectJs_ success error p filename)
 
 
-foreign import evaluate_ :: forall e.
-  (Array String -> Eff e Unit) ->
+foreign import evaluate_ :: forall e a.
+  (a -> Eff e Unit) ->
   (Error -> Eff e Unit) ->
   Page ->
   String ->
   Eff e Unit
 
-evaluate :: forall e. Page -> String -> Aff e (Array String)
+evaluate :: forall e a. Page -> String -> Aff e a
 evaluate p fnName = makeAff (\error success -> evaluate_ success error p fnName)

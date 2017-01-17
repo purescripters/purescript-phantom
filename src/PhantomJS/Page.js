@@ -58,6 +58,23 @@ exports.injectJs_ = function(callback) {
   }
 }
 
+exports.customHeaders_ = function(callback) {
+  return function(errorCallback) {
+    return function(page) {
+      return function(foreignObj) {
+        return function() {
+          if (foreignObj !== null && typeof foreignObj === 'object') {
+            page.customHeaders = foreignObj;
+            callback(page)();
+          } else {
+            errorCallback("Custom headers is not an object.")();
+          }
+        }
+      }
+    }
+  }
+}
+
 exports.evaluate_ = function(callback) {
   return function(errorCallback) {
     return function(page) {
