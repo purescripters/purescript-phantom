@@ -89,7 +89,7 @@ exports.evaluate_ = function(callback) {
               }
           }, fnName);
 
-          if (r.slice(0,11) == "!!!ERROR!!!") {
+          if (r.slice && r.slice(0,11) == "!!!ERROR!!!") {
             errorCallback("Evaluation error while running function '" + fnName + "' in page. Message: " + r.slice(11))();
           } else {
             callback(r)();
