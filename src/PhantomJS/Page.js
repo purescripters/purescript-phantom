@@ -1,100 +1,109 @@
 'use strict';
 
-exports.createPage_ = function(callback) {
+function PhantomPageError(message, stack) {
+  this.name = 'PhantomPageError';
+  this.message = message;
+  this.stack = stack;
+}
+PhantomPageError.prototype = Object.create(Error.prototype);
+PhantomPageError.prototype.constructor = PhantomPageError;
+
+exports.createPage_ = function(success, error) {
   var webpage = require('webpage').create();
-  return function() {
-    callback(webpage)();
-  }
+  success(webpage);
 }
 
-exports.open_ = function(callback) {
-  return function(errorCallback) {
-    return function(page) {
-      return function(url) {
-        return function(a,b,c,d) {
-          page.open(url, function(status) {
-            // http://phantomjs.org/api/webpage/method/open.html
-            // 'success' or 'fail'
-            if (status == "success") {
-              callback(page)();
-            } else {
-              errorCallback("open '" + url + "' failed with phantom status '" + status + "'")();
-            }
-          });
+exports.open_ = function(page) {
+  return function(url) {
+    return function(success, error) {
+      page.open(url, function(status) {
+        // http://phantomjs.org/api/webpage/method/open.html
+        // 'success' or 'fail'
+        if (status == "success") {
+          success(page);
+        } else {
+          error(new Error("open '" + url + "' failed with phantom status '" + status + "'"));
         }
-      }
+      });
     }
   }
 }
 
-exports.render_ = function(callback) {
-  return function(page) {
-    return function(filename) {
-      return function(format) {
-        return function() {
+
+exports.render_ = function(page) {
+  return function(filename) {
+    return function(format) {
+      return function(quality) {
+        return function(success, error) {
+
           // http://phantomjs.org/api/webpage/method/render.html
-          page.render(filename, format)
-          callback(page)();
+          page.render(filename, {
+            format : format,
+            quality : quality
+          });
+
+          success(page);
         }
       }
     }
   }
 }
 
-exports.injectJs_ = function(callback) {
-  return function(errorCallback) {
-    return function(page) {
-      return function(filename) {
-        return function() {
-          // http://phantomjs.org/api/webpage/method/inject-js.html
-          if (page.injectJs(filename)) {
-            callback(page)();
-          } else {
-            errorCallback("'" + filename + "' could not be injected into page.  Maybe the filepath is misspelled or does not exist?")();
-          }
-        }
+
+exports.injectJs_ = function(page) {
+  return function(filename) {
+    return function(success, error) {
+      // http://phantomjs.org/api/webpage/method/inject-js.html
+      if (page.injectJs(filename)) {
+        success(page);
+      } else {
+        error(new Error("'" + filename + "' could not be injected into page.  Maybe the filepath is misspelled or does not exist?"));
       }
     }
   }
 }
 
-exports.customHeaders_ = function(callback) {
-  return function(errorCallback) {
-    return function(page) {
-      return function(foreignObj) {
-        return function() {
-          if (foreignObj !== null && typeof foreignObj === 'object') {
-            page.customHeaders = foreignObj;
-            callback(page)();
-          } else {
-            errorCallback("Custom headers is not an object.")();
-          }
-        }
-      }
+
+exports.customHeaders_ = function(page) {
+  return function(foreignObj) {
+    return function(success, error) {
+      page.customHeaders = foreignObj;
+      success(page);
     }
   }
 }
 
-exports.evaluate_ = function(callback) {
-  return function(errorCallback) {
-    return function(page) {
-      return function(fnName) {
-        return function() {
-          // http://phantomjs.org/api/webpage/method/inject-js.html
-          var r = page.evaluate(function(fnName) {
-              try {
-                return window[fnName]();
-              } catch (e) {
-                return "!!!ERROR!!!(" + e.message + "";
-              }
-          }, fnName);
 
-          if (r.slice && r.slice(0,11) == "!!!ERROR!!!") {
-            errorCallback("Evaluation error while running function '" + fnName + "' in page. Message: " + r.slice(11))();
-          } else {
-            callback(r)();
+exports.evaluate_ = function(page) {
+  return function(fnName) {
+    return function(success, error) {
+
+      var r = page.evaluate(function(fnName) {
+          try {
+            return window[fnName]();
+          } catch (e) {
+
+            // If we just return e, then
+            // { "line": Int, "sourceURL": String, "stack": String }
+            // gets passed to the local context.  Creating a custom
+            // object allow us to pass more information about the exception.
+            return {
+              type : "purescript-phantom-error",
+              message : e.message,
+              stack : e.stack,
+              line : e.line,
+              sourceURL : e.sourceURL
+            }
           }
-        }
+      }, fnName);
+
+      if (r.type && r.type == "purescript-phantom-error") {
+        // An exception was thrown in the page's context
+        // so we'll create a custom Error object that
+        // lets us set the message and stack
+        error(new PhantomPageError(r.message, r.stack));
+      } else {
+        success(r);
       }
     }
   }

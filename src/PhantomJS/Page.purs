@@ -2,9 +2,9 @@ module PhantomJS.Page
   ( RenderFormat(..)
   , RenderSettings
   , jpeg
+  , png
   , Page
   , createPage
-  , hPair
   , customHeaders
   , open
   , render
@@ -12,18 +12,17 @@ module PhantomJS.Page
   , evaluate
   ) where
 
-import Prelude
-import Control.Monad.Aff (Aff, makeAff)
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Exception (Error)
-import Data.Tuple (Tuple(..))
+import Prelude (class Show, show)
+import Control.Monad.Aff (Aff)
+import Data.Tuple (Tuple)
 import Data.StrMap (StrMap, fromFoldable)
 import Data.Foldable (class Foldable)
 
 type URL = String
-type Filename = String
+type FilePath = String
+type RenderQuality = Int
 
-
+-- | The type of image format when rendering a screenshot
 data RenderFormat
   = PDF
   | PNG
@@ -32,84 +31,79 @@ data RenderFormat
   | PPM
   | GIF
 
+instance showRenderFormat :: Show RenderFormat where
+  show PDF = "pdf"
+  show PNG = "png"
+  show JPEG = "jpg"
+  show BMP = "bmp"
+  show PPM = "ppm"
+  show GIF = "gif"
 
+-- | The type and quality of a rendered screenshot
 newtype RenderSettings
   = RenderSettings
   { format :: RenderFormat
-  , quality :: Int }
+  , quality :: RenderQuality }
 
-
+-- | Predefined setting for rendering screenshot as jpeg
 jpeg :: RenderSettings
 jpeg
   = RenderSettings
   { format : JPEG
   , quality : 100 }
 
+-- | Predefined setting for rendering screenshot as png
+png :: RenderSettings
+png
+  = RenderSettings
+  { format : PNG
+  , quality : 100 }
 
+-- | The type of a PhantomJS page context.
 foreign import data Page :: *
 
+foreign import createPage_ :: forall e. Aff (| e) Page
 
-foreign import createPage_ :: forall e. (Page -> Eff e Unit) -> Eff e Unit
-
+-- | Creates a new page context.
 createPage :: forall e. Aff e Page
-createPage = makeAff (\error success -> createPage_ success)
+createPage = createPage_
 
--- | Just so consumers don't have to impore Tuple themselves...
-hPair :: String -> String -> Tuple String String
-hPair = Tuple
 
-foreign import customHeaders_ :: forall e.
-  (Page -> Eff e Unit) ->
-  (Error -> Eff e Unit) ->
-  Page ->
-  StrMap String ->
-  Eff e Unit
+foreign import customHeaders_ :: forall e. Page -> StrMap String -> Aff (| e) Page
 
+-- | Sets custom headers on a page context.  These headers will persist
+-- | for the life of the context.
 customHeaders :: forall e f. (Foldable f) => Page -> f (Tuple String String) -> Aff e Page
-customHeaders page headers =
-  makeAff (\error success ->
-    customHeaders_ success error page (fromFoldable headers)
-  )
+customHeaders page headers = customHeaders_ page (fromFoldable headers)
 
-foreign import open_ :: forall e.
-  (Page -> Eff e Unit) ->
-  (Error -> Eff e Unit) ->
-  Page ->
-  URL ->
-  Eff e Unit
 
+foreign import open_ :: forall e. Page -> URL -> Aff (| e) Page
+
+-- | Opens a URL in a page context.
 open :: forall e. Page -> URL -> Aff e Page
-open p url = makeAff (\error success -> open_ success error p url)
+open = open_
 
 
-foreign import render_ :: forall e.
-  (Page -> Eff e Unit) ->
-  Page ->
-  Filename ->
-  RenderSettings ->
-  Eff e Unit
+foreign import render_ :: forall e. Page -> FilePath -> String -> RenderQuality -> Aff (| e) Page
 
-render :: forall e. Page -> Filename -> RenderSettings ->  Aff e Page
-render p filename rs = makeAff (\error success -> render_ success p filename rs)
+-- | Renders a screenshot of the given page.
+render :: forall e. Page -> FilePath -> RenderSettings ->  Aff e Page
+render page fp (RenderSettings { format : format, quality : quality }) = render_ page fp (show format) quality
 
 
-foreign import injectJs_ :: forall e.
-  (Page -> Eff e Unit) ->
-  (Error -> Eff e Unit) ->
-  Page ->
-  Filename ->
-  Eff e Unit
+foreign import injectJs_ :: forall e. Page -> FilePath -> Aff (| e) Page
 
-injectJs :: forall e. Page -> Filename -> Aff e Page
-injectJs p filename = makeAff (\error success -> injectJs_ success error p filename)
+-- | Injects a javascript file into a page.
+injectJs :: forall e. Page -> FilePath -> Aff e Page
+injectJs = injectJs_
 
 
-foreign import evaluate_ :: forall e a.
-  (a -> Eff e Unit) ->
-  (Error -> Eff e Unit) ->
-  Page ->
-  String ->
-  Eff e Unit
+foreign import evaluate_ :: forall e a. Page -> String -> Aff (| e) a
 
+-- | Evaluates a specific function on the window object of the page.
+-- | When using this function you will need to add a type annotation so
+-- | PureScript knows what type the native javascript will return, e.g.
+-- |
+-- | `result <- evaluate page "file.js" :: forall e. Aff e (Array String)`
 evaluate :: forall e a. Page -> String -> Aff e a
-evaluate p fnName = makeAff (\error success -> evaluate_ success error p fnName)
+evaluate = evaluate_

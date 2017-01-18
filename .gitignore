@@ -7,3 +7,4 @@
 *.tix
 /.psc-ide-port
 /npm-debug.log
+/.psa-stash
