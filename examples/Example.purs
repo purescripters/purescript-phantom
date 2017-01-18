@@ -1,11 +1,13 @@
 module Example where
 
 import Prelude
-import Control.Monad.Aff (Aff, attempt)
+import Control.Monad.Aff (Aff, attempt, runAff, launchAff)
 import Data.Either(Either(..))
+import Control.Monad.Eff (foreachE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import PhantomJS.Page (open, render, jpeg, createPage, injectJs, evaluate, Page, customHeaders, hPair)
+import PhantomJS.File (PHANTOMFS, openStream, writeStream, closeStream, forWritingIn, FileMode)
 import PhantomJS.Phantom (PHANTOMJS, exit)
 
 -- import Control.Monad.Eff.Exception
@@ -22,11 +24,12 @@ import PhantomJS.Phantom (PHANTOMJS, exit)
 -- cd examples-output
 -- phantomjs test.js
 
-main :: forall t63.
+main :: forall t105.
   Aff
     ( console :: CONSOLE
+    , phantomfs :: PHANTOMFS
     , phantomjs :: PHANTOMJS
-    | t63
+    | t105
     )
     Unit
 main = do
@@ -35,8 +38,11 @@ main = do
     Left err -> do
       liftEff $ log (show err)
       liftEff $ exit 0
-    Right val -> do
-      liftEff $ log "Done"
+    Right vals -> do
+      liftEff $ log "Writing to file..."
+      s <- openStream "TEST.txt" (forWritingIn "UTF-8")
+      writeStream s "ttttttttttttt"
+      closeStream s
       liftEff $ exit 0
 
 
@@ -45,7 +51,7 @@ runPhantom :: forall t49.
     ( console :: CONSOLE
     | t49
     )
-    Page
+    (Array String)
 runPhantom = do
   page <- createPage
 
@@ -69,8 +75,9 @@ runPhantom = do
   -- Will fail
   -- content <- attempt $ evaluate page "getParagraphhhContent"
 
-  content <- attempt $ evaluate page "getParagraphContent" :: forall e. Aff e (Array String)
+  content <- evaluate page "getParagraphContent" :: forall e. Aff e (Array String)
 
   liftEff $ log (show content)
 
-  render page "pageRender.jpg" jpeg
+  pure content
+  -- render page "pageRender.jpg" jpeg
