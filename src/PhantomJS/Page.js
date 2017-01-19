@@ -3,7 +3,7 @@
 function PhantomPageError(message, stack) {
   this.name = 'PhantomPageError';
   this.message = message;
-  this.stack = stack;
+  this.stack = stack || (new Error()).stack;
 }
 PhantomPageError.prototype = Object.create(Error.prototype);
 PhantomPageError.prototype.constructor = PhantomPageError;
