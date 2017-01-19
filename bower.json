@@ -20,7 +20,8 @@
     "purescript-console": "^2.0.0",
     "purescript-prelude": "^2.1.0",
     "purescript-aff": "^2.0.2",
-    "purescript-maps": "^2.0.2"
+    "purescript-maps": "^2.0.2",
+    "purescript-foreign": "^3.0.1"
   },
   "devDependencies": {
     "purescript-psci-support": "^2.0.0",
