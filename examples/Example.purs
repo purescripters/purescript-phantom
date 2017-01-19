@@ -31,7 +31,6 @@ main = do
     Left err ->  do
       log $ ("Error: " <> (message err))
       log $ "Stack: " <> (fromMaybe "No stack trace." (stack err))
-      --liftEff $ exit 1
     Right val -> do
       log "Screenshot with red background captured."
 
@@ -42,7 +41,6 @@ main = do
     Left err -> do
       log $ "Error: " <> (message err)
       log $ "Stack: " <> (fromMaybe "No stack trace." (stack err))
-      --liftEff $ exit 1
     Right val -> do
       log "Paragraph content successfully retrieved."
       logShow val
@@ -53,7 +51,6 @@ main = do
     Left err -> do
       log $ "Error: " <> (message err)
       log $ "Stack: " <> (fromMaybe "No stack trace." (stack err))
-      --liftEff $ exit 1
     Right val -> do
       log "This will not succeed."
   log "--------"
