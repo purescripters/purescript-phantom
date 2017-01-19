@@ -12,17 +12,22 @@ module PhantomJS.Page
   , evaluate
   ) where
 
-import Prelude (class Show, show)
+import Prelude (class Show, show, class Eq, (<<<))
 import Control.Monad.Aff (Aff)
 import Data.Tuple (Tuple)
 import Data.StrMap (StrMap, fromFoldable)
 import Data.Foldable (class Foldable)
 import PhantomJS.Phantom (PHANTOMJS)
+import Data.Foreign (toForeign, Foreign)
+import Data.Foreign.Class (class AsForeign, write)
+import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Show (genericShow)
 
 type URL = String
 type FilePath = String
 type RenderQuality = Int
 type PhantomAff e a = Aff (phantomjs :: PHANTOMJS | e) a
+type ForeignRenderSettings = Foreign
 
 -- | The type of image format when rendering a screenshot
 data RenderFormat
@@ -33,6 +38,8 @@ data RenderFormat
   | PPM
   | GIF
 
+derive instance eqRenderFormat :: Eq RenderFormat
+
 instance showRenderFormat :: Show RenderFormat where
   show PDF = "pdf"
   show PNG = "png"
@@ -41,11 +48,26 @@ instance showRenderFormat :: Show RenderFormat where
   show PPM = "ppm"
   show GIF = "gif"
 
+instance foreignRenderFormat :: AsForeign RenderFormat where
+  write = toForeign <<< show
+
 -- | The type and quality of a rendered screenshot
 newtype RenderSettings
   = RenderSettings
   { format :: RenderFormat
   , quality :: RenderQuality }
+
+derive instance genericRenderSettings :: Generic RenderSettings _
+derive instance eqRenderSettings :: Eq RenderSettings
+
+instance showRenderSettings :: Show RenderSettings where
+  show = genericShow
+
+instance asForeignRenderSettings :: AsForeign RenderSettings where
+  write (RenderSettings { format : format, quality : quality }) =
+    toForeign
+      { format : (write format)
+      , quality : quality }
 
 -- | Predefined setting for rendering screenshot as jpeg
 jpeg :: RenderSettings
@@ -53,6 +75,7 @@ jpeg
   = RenderSettings
   { format : JPEG
   , quality : 100 }
+
 
 -- | Predefined setting for rendering screenshot as png
 png :: RenderSettings
@@ -86,11 +109,11 @@ open :: forall e. Page -> URL -> PhantomAff e Page
 open = open_
 
 
-foreign import render_ :: forall e. Page -> FilePath -> String -> RenderQuality -> PhantomAff e Page
+foreign import render_ :: forall e. Page -> FilePath -> ForeignRenderSettings -> PhantomAff e Page
 
 -- | Renders a screenshot of the given page.
 render :: forall e. Page -> FilePath -> RenderSettings ->  PhantomAff e Page
-render page fp (RenderSettings { format : format, quality : quality }) = render_ page fp (show format) quality
+render page fp rs = render_ page fp (write rs)
 
 
 foreign import injectJs_ :: forall e. Page -> FilePath -> PhantomAff e Page
