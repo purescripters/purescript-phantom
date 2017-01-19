@@ -24,6 +24,6 @@
   },
   "homepage": "https://github.com/Risto-Stevcev/purescript-phantom#readme",
   "devDependencies": {
-    "phantomjs-prebuilt": "2.1.13"
+    "phantomjs-prebuilt": "2.1.14"
   }
 }

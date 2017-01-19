@@ -7,7 +7,9 @@
     "**/.*",
     "node_modules",
     "bower_components",
-    "output"
+    "output",
+    "examples",
+    "examples-output"
   ],
   "homepage": "https://github.com/Risto-Stevcev/purescript-phantom#readme",
   "repository": {
@@ -15,7 +17,10 @@
     "url": "git://github.com/Risto-Stevcev/purescript-phantom.git"
   },
   "dependencies": {
-    "purescript-console": "^2.0.0"
+    "purescript-console": "^2.0.0",
+    "purescript-prelude": "^2.1.0",
+    "purescript-aff": "^2.0.2",
+    "purescript-maps": "^2.0.2"
   },
   "devDependencies": {
     "purescript-psci-support": "^2.0.0",
