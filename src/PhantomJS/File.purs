@@ -5,6 +5,8 @@ import Data.Function.Uncurried (Fn2, runFn2)
 import Control.Monad.Aff (Aff)
 import Data.Foreign (toForeign)
 import Data.Foreign.Class (class AsForeign, write)
+import Data.Generic (class Generic)
+import Data.Generic.Rep.Show (genericShow)
 
 type Charset = String
 type FilePath = String
@@ -16,7 +18,9 @@ data FileMode
   | B
 
 derive instance eqFileMode :: Eq FileMode
-derive instance showFileMode :: Show FileMode
+derive instance genericFileMode :: Generic FileMode
+instance showFileMode :: Show FileMode where
+  show x = genericShow x
 
 instance foreignFileMode :: AsForeign FileMode where
   write R = toForeign "r"
