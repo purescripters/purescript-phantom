@@ -8,7 +8,7 @@ import Data.Either(Either(..))
 import Control.Monad.Eff.Exception(message, stack)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
-import PhantomJS.Page (open, render, createPage, injectJs, evaluate, Page, customHeaders, png)
+import PhantomJS.Page (open, render, createPage, injectJs, evaluate, Page, customHeadersRaw, png)
 import PhantomJS.Phantom (PHANTOMJS, exit)
 import Data.Tuple (Tuple(..))
 
@@ -63,7 +63,7 @@ main = do
 failureFunction :: forall eff. Aff ( console :: CONSOLE | eff ) Page
 failureFunction = do
   page <- createPage
-  customHeaders page [
+  customHeadersRaw page [
     Tuple "user-agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36"
   ]
   log ("Fetching page...")
@@ -74,7 +74,7 @@ failureFunction = do
 screenshotRedPage :: forall eff. Aff ( console :: CONSOLE | eff ) Page
 screenshotRedPage = do
   page <- createPage
-  customHeaders page [
+  customHeadersRaw page [
     Tuple "user-agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36"
   ]
   log ("Fetching page...")
@@ -85,7 +85,7 @@ screenshotRedPage = do
 getParagraphsFromPage :: forall eff. Aff ( console :: CONSOLE | eff ) (Array String)
 getParagraphsFromPage = do
   page <- createPage
-  customHeaders page [
+  customHeadersRaw page [
     Tuple "user-agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36"
   ]
   log ("Fetching page...")

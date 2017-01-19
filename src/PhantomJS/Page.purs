@@ -5,7 +5,7 @@ module PhantomJS.Page
   , png
   , Page
   , createPage
-  , customHeaders
+  , customHeadersRaw
   , open
   , render
   , injectJs
@@ -73,8 +73,8 @@ foreign import customHeaders_ :: forall e. Page -> StrMap String -> Aff (| e) Pa
 
 -- | Sets custom headers on a page context.  These headers will persist
 -- | for the life of the context.
-customHeaders :: forall e f. (Foldable f) => Page -> f (Tuple String String) -> Aff e Page
-customHeaders page headers = customHeaders_ page (fromFoldable headers)
+customHeadersRaw :: forall e f. (Foldable f) => Page -> f (Tuple String String) -> Aff e Page
+customHeadersRaw page headers = customHeaders_ page (fromFoldable headers)
 
 
 foreign import open_ :: forall e. Page -> URL -> Aff (| e) Page
