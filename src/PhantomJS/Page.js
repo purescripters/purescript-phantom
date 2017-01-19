@@ -22,7 +22,7 @@ exports.open_ = function(page) {
         if (status == "success") {
           success(page);
         } else {
-          error(new Error("open '" + url + "' failed with phantom status '" + status + "'"));
+          error(new PhantomPageError("open '" + url + "' failed with phantom status '" + status + "'"));
         }
       });
     }
@@ -36,13 +36,17 @@ exports.render_ = function(page) {
       return function(quality) {
         return function(success, error) {
 
-          // http://phantomjs.org/api/webpage/method/render.html
-          page.render(filename, {
-            format : format,
-            quality : quality
-          });
+          try {
+            // http://phantomjs.org/api/webpage/method/render.html
+            var r = page.render(filename, {
+              format : format,
+              quality : quality
+            });
 
-          success(page);
+            success(page);
+          } catch (e) {
+            error(new PhantomPageError("Could not render page to file '" + filename + "'. " + e.message, e.stack));
+          }
         }
       }
     }
@@ -57,7 +61,7 @@ exports.injectJs_ = function(page) {
       if (page.injectJs(filename)) {
         success(page);
       } else {
-        error(new Error("'" + filename + "' could not be injected into page.  Maybe the filepath is misspelled or does not exist?"));
+        error(new PhantomPageError("'" + filename + "' could not be injected into page.  Maybe the filepath is misspelled or does not exist?"));
       }
     }
   }
