@@ -57,7 +57,7 @@ main = do
 
   liftEff $ exit 0
 
-failureFunction :: forall eff. Aff ( console :: CONSOLE | eff ) Page
+failureFunction :: forall eff. Aff ( phantomjs :: PHANTOMJS, console :: CONSOLE | eff ) Page
 failureFunction = do
   page <- createPage
   customHeadersRaw page [
@@ -68,7 +68,7 @@ failureFunction = do
   injectJs page "assets/fileDoesNotExist.js"
   render page "pageRender.png" png
 
-screenshotRedPage :: forall eff. Aff ( console :: CONSOLE | eff ) Page
+screenshotRedPage :: forall eff. Aff ( phantomjs :: PHANTOMJS, console :: CONSOLE | eff ) Page
 screenshotRedPage = do
   page <- createPage
   customHeadersRaw page [
@@ -79,7 +79,7 @@ screenshotRedPage = do
   injectJs page "assets/backgroundRed.js"
   render page "pageRender.png" png
 
-getParagraphsFromPage :: forall eff. Aff ( console :: CONSOLE | eff ) (Array String)
+getParagraphsFromPage :: forall eff. Aff ( phantomjs :: PHANTOMJS, console :: CONSOLE | eff ) (Array String)
 getParagraphsFromPage = do
   page <- createPage
   customHeadersRaw page [
