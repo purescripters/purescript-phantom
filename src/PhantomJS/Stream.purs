@@ -52,7 +52,7 @@ withSettings fm charset =
   { mode : fm
   , charset : charset
   }
-  
+
 foreign import data PHANTOMJSFS :: !
 
 foreign import data Stream :: *
@@ -69,6 +69,13 @@ foreign import readLine_ :: forall e a.  Stream -> (a -> Maybe a) -> (Maybe a) -
 
 foreign import close_ :: forall e. Stream -> (Aff ( phantomjsfs :: PHANTOMJSFS | e ) Unit)
 
+foreign import exists_ :: forall e. FilePath -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Boolean
+
+foreign import remove_ :: forall e. FilePath -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Unit
+
+exists :: forall e. FilePath -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Boolean
+exists = exists_
+
 open :: forall e. FilePath -> StreamSettings -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Stream
 open fp fs = open_ fp (FC.write fs)
 
@@ -81,6 +88,8 @@ writeLine = writeLine_
 readLine :: forall e. Stream -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) (Maybe String)
 readLine stream = readLine_ stream Just Nothing
 
+remove :: forall e. FilePath -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Unit
+remove = remove_
 
 close :: forall e. Stream -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Unit
 close = close_

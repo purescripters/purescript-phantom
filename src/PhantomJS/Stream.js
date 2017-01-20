@@ -28,6 +28,30 @@ exports.write_ = function(stream) {
   }
 }
 
+exports.exists_ = function(filepath) {
+  return function(success, error) {
+    try {
+      // http://phantomjs.org/api/fs/method/exists.html
+      var exists = fs.exists(filepath);
+    } catch (e) {
+      error(e);
+    }
+    success(exists);
+  }
+}
+
+exports.remove_ = function(filepath) {
+  return function(success, error) {
+    try {
+      // http://phantomjs.org/api/fs/method/remove.html
+      fs.remove(filepath);
+    } catch (e) {
+      error(e);
+    }
+    success();
+  }
+}
+
 exports.readLine_ = function(stream) {
   return function(just) {
     return function (nothing) {
