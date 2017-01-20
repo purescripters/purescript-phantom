@@ -25,3 +25,16 @@ main = do
   version >>= logShow
   exit (fromEnum Success)
 ```
+
+```
+
+docker pull gyeh/purescript:0.9.1
+docker run --rm -itv $(pwd)/purescript-phantom-master/:/home/pureuser/src 85322 bash
+
+inside container
+
+cd ~/src
+npm install
+pulp test --runtime ./node_modules/phantomjs-prebuilt/bin/phantomjs
+
+```

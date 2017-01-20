@@ -1,39 +1,31 @@
-module PhantomJS.Stream where
+module PhantomJS.Stream
+  ( Stream
+  , StreamSettings
+  , open
+  , write
+  , writeLine
+  , readLine
+  , close
+  , withSettings
+  ) where
 
-import Prelude (pure, Unit, class Eq, (<>), class Show, show, (<<<), class Monad, class Applicative, (>>=))
-import Data.Monoid (class Monoid, mempty)
-import Control.Monad.Aff (Aff)
+import Prelude (Unit, class Show)
 import Data.Foreign (toForeign, Foreign)
 import Data.Foreign.Class as FC
 import Data.Foreign.Class (class AsForeign)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..))
+import PhantomJS.File (FileMode, Charset, FilePath, PhantomFSAff)
 
-type Charset = String
-type FilePath = String
 type ForeignStreamSettings = Foreign
 
--- http://phantomjs.org/api/fs/method/open.html
--- Doesn't look like the + does anything.
-data FileMode = R | W | A | RW
-
-derive instance genericFileMode :: Generic FileMode _
-derive instance eqFileMode :: Eq FileMode
-
-instance showFileMode :: Show FileMode where
-  show R = "r"   -- read         -   (don't create if not exists)
-  show RW = "rw" -- read + write -   (don't create if not exists, append to file)
-  show W = "w"   -- write        -  (create if not exists, overwrite existing)
-  show A = "a"   -- append       -  (create if not exists, append to file)
-
-instance foreignFileMode :: AsForeign FileMode where
-  write = toForeign <<< show
-
+-- http://stackoverflow.com/questions/8509339/what-is-the-most-common-encoding-of-each-language
 -- http://www.iana.org/assignments/character-sets/character-sets.xhtml
+-- | The filemode and character set settings needed to open a stream.
 newtype StreamSettings = StreamSettings
   { mode :: FileMode
-  , charset :: String
+  , charset :: Charset
   }
 
 derive instance genericStreamSettings :: Generic StreamSettings _
@@ -46,6 +38,7 @@ instance asForeignStreamSettings :: AsForeign StreamSettings where
       { mode : (FC.write filemode)
       , charset : (FC.write charset) }
 
+-- | Helper for creating a StreamSettings type
 withSettings :: FileMode -> Charset -> StreamSettings
 withSettings fm charset =
   StreamSettings
@@ -53,43 +46,34 @@ withSettings fm charset =
   , charset : charset
   }
 
-foreign import data PHANTOMJSFS :: !
-
 foreign import data Stream :: *
 
-type PhantomAff e a = Aff ( phantomjsfs :: PHANTOMJSFS | e ) a
+foreign import open_ :: forall e. FilePath -> ForeignStreamSettings -> PhantomFSAff e Stream
 
-foreign import open_ :: forall e. FilePath -> ForeignStreamSettings -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Stream
+foreign import write_ :: forall e.  Stream -> String -> PhantomFSAff e Stream
 
-foreign import write_ :: forall e.  Stream -> String -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Stream
+foreign import writeLine_ :: forall e.  Stream -> String -> PhantomFSAff e Stream
 
-foreign import writeLine_ :: forall e.  Stream -> String -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Stream
+foreign import readLine_ :: forall e a.  Stream -> (a -> Maybe a) -> (Maybe a) -> PhantomFSAff e (Maybe String)
 
-foreign import readLine_ :: forall e a.  Stream -> (a -> Maybe a) -> (Maybe a) -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) (Maybe String)
+foreign import close_ :: forall e. Stream -> PhantomFSAff e Unit
 
-foreign import close_ :: forall e. Stream -> (Aff ( phantomjsfs :: PHANTOMJSFS | e ) Unit)
-
-foreign import exists_ :: forall e. FilePath -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Boolean
-
-foreign import remove_ :: forall e. FilePath -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Unit
-
-exists :: forall e. FilePath -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Boolean
-exists = exists_
-
-open :: forall e. FilePath -> StreamSettings -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Stream
+-- Open a file stream
+open :: forall e. FilePath -> StreamSettings -> PhantomFSAff e Stream
 open fp fs = open_ fp (FC.write fs)
 
-write :: forall e. Stream -> String -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Stream
+-- Write to a file stream
+write :: forall e. Stream -> String -> PhantomFSAff e Stream
 write = write_
 
-writeLine :: forall e. Stream -> String -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Stream
+-- Write a line to a file stream
+writeLine :: forall e. Stream -> String -> PhantomFSAff e Stream
 writeLine = writeLine_
 
-readLine :: forall e. Stream -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) (Maybe String)
+-- Read a line from a file stream
+readLine :: forall e. Stream -> PhantomFSAff e (Maybe String)
 readLine stream = readLine_ stream Just Nothing
 
-remove :: forall e. FilePath -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Unit
-remove = remove_
-
-close :: forall e. Stream -> Aff ( phantomjsfs :: PHANTOMJSFS | e ) Unit
+-- Close a file stream
+close :: forall e. Stream -> PhantomFSAff e Unit
 close = close_

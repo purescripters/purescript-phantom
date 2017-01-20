@@ -5,16 +5,25 @@ import PhantomJS.Page
 import Control.Monad.Aff (Aff, attempt)
 import Control.Monad.Free (Free)
 import Data.Either (isRight, isLeft)
-import PhantomJS.Stream (PHANTOMJSFS, exists, remove)
+import PhantomJS.File (PHANTOMJSFS, exists, remove)
 import Prelude (Unit, bind, ($), (<>), (==))
 import Test.Unit (Test, TestF, describe, it)
 import Test.Unit.Assert (shouldEqual, assert)
+
+-- If you're using the purescript-docker container,
+-- otherwise set this to the absolute path of where
+-- the project was cloned
+projectRoot :: String
+projectRoot = "/home/pureuser/src/"
 
 -- Assuming we're running in project root right now.
 -- Should look into using the docker container used by
 -- Phantom.Tests
 testHtmlFile :: String
-testHtmlFile = "file:///home/dom/Backup/programming/purescript/purescript-phantom-master/test/assets/test.html"
+testHtmlFile = projectRoot <> "test/assets/test.html"
+
+tempFolder :: String
+tempFolder = projectRoot <> "test/assets/temp/"
 
 -- testImageRender :: forall a. String -> RenderSettings -> Test a
 testImageRender :: forall eff.
@@ -30,14 +39,14 @@ testImageRender :: forall eff.
           Unit
 testImageRender filename renderSettings = do
   it ("should render test.html to " <> filename) do
-    let image = ("test/assets/temp/" <> filename)
+    let image = tempFolder <> filename
     attempt $ remove image
     p <- createPage
     open p testHtmlFile
     render p image renderSettings
     fileExists <- (exists image)
     attempt $ remove image
-    assert ("test/assets/temp/" <> filename <> " is not there.") fileExists
+    assert (tempFolder <> filename <> " is not there.") fileExists
 
 pageTests :: forall eff. Free (TestF (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | eff)) Unit
 pageTests = do
