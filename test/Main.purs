@@ -12,6 +12,7 @@ import PhantomJS.Phantom (exit, PHANTOMJS)
 import PhantomJS.File (PHANTOMJSFS)
 import Prelude (($), bind)
 import Test.PhantomJS.Page (pageTests)
+import Test.PhantomJS.File (fileTests)
 import Test.PhantomJS.Phantom (phantomTests)
 import Test.Unit (describe, it)
 import Test.Unit.Assert (assert)
@@ -27,8 +28,8 @@ main
          (Canceler (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS, console :: CONSOLE, avar :: AVAR | eff))
 main = launchAff $ runTest do
   phantomTests
-
   pageTests
+  fileTests
 
   describe "exit" $ do
     it "should exit" $ do

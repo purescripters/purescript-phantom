@@ -6,6 +6,8 @@ module PhantomJS.File
   , PhantomFSAff
   , exists
   , remove
+  , write
+  , read
   , lastModified
   ) where
 
@@ -19,6 +21,7 @@ import Data.Time.Duration (Milliseconds)
 
 type Charset = String
 type FilePath = String
+type FileContent = String
 type PhantomFSAff e a = Aff ( phantomjsfs :: PHANTOMJSFS | e ) a
 type ForeignFileMode = Foreign
 
@@ -45,7 +48,9 @@ foreign import exists_ :: forall e. FilePath -> PhantomFSAff e Boolean
 
 foreign import remove_ :: forall e. FilePath -> PhantomFSAff e Unit
 
-foreign import write_ :: forall e. FilePath -> String -> ForeignFileMode -> PhantomFSAff e Unit
+foreign import write_ :: forall e. FilePath -> FileContent -> ForeignFileMode -> PhantomFSAff e Unit
+
+foreign import read_ :: forall e. FilePath -> PhantomFSAff e Foreign
 
 foreign import lastModified_ :: forall e. FilePath -> PhantomFSAff e Milliseconds
 
@@ -58,8 +63,12 @@ exists :: forall e. FilePath -> PhantomFSAff e Boolean
 exists = exists_
 
 -- Writes to a file
-write :: forall e. FilePath -> String -> FileMode -> PhantomFSAff e Unit
+write :: forall e. FilePath -> FileContent -> FileMode -> PhantomFSAff e Unit
 write fp c fm = write_ fp c (FC.write fm)
+
+-- Reads from a file
+read :: forall e. FilePath -> PhantomFSAff e Foreign
+read = read_
 
 -- Returns the last modified date of a file in milliseconds.  If the file
 -- doesn't exist, an error is thrown.

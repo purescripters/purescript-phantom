@@ -27,8 +27,8 @@ exports.remove_ = function(filepath) {
 }
 
 exports.write_ = function(filepath) {
-  function (str) {
-    function (filemode) {
+  return function (str) {
+    return function (filemode) {
       return function(success, error) {
         try {
           // http://phantomjs.org/api/fs/method/write.html
@@ -42,8 +42,26 @@ exports.write_ = function(filepath) {
   }
 }
 
+exports.read_ = function(filepath) {
+  return function(success, error) {
+    try {
+      // http://phantomjs.org/api/fs/method/read.html
+      var content = fs.read(filepath);
+
+      // if (content == null) {
+      //   throw new Error('File ' + filepath + ' could not be found.')
+      // }
+    } catch (e) {
+      // e is undefeind in this situation, so we don't do
+      // error(e);
+      error(new Error("File '" + filepath + "' could not be read."));
+    }
+    success("ABC");
+  }
+}
+
 exports.lastModified_ = function(filepath) {
-  function(toDateTime) {
+  return function(toDateTime) {
     return function(success, error) {
       try {
         // http://phantomjs.org/api/fs/method/lastModified.html
