@@ -42,9 +42,8 @@ fileTests = do
         assert "the file wasn't created." (a == true)
 
       it "should read 'ABC' from the file." do
-        b <- read tempFile
-        let c = runExcept $ readString b
-        assert "the value 'ABC' wasn't in the file." (c == (Right "ABC"))
+        c <- read tempFile
+        assert "the value 'ABC' wasn't in the file." (c == "ABC")
 
       it "should remove the file" do
         remove tempFile

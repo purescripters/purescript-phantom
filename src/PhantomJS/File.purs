@@ -50,7 +50,7 @@ foreign import remove_ :: forall e. FilePath -> PhantomFSAff e Unit
 
 foreign import write_ :: forall e. FilePath -> FileContent -> ForeignFileMode -> PhantomFSAff e Unit
 
-foreign import read_ :: forall e. FilePath -> PhantomFSAff e Foreign
+foreign import read_ :: forall e. FilePath -> PhantomFSAff e String
 
 foreign import lastModified_ :: forall e. FilePath -> PhantomFSAff e Milliseconds
 
@@ -67,7 +67,7 @@ write :: forall e. FilePath -> FileContent -> FileMode -> PhantomFSAff e Unit
 write fp c fm = write_ fp c (FC.write fm)
 
 -- Reads from a file
-read :: forall e. FilePath -> PhantomFSAff e Foreign
+read :: forall e. FilePath -> PhantomFSAff e String
 read = read_
 
 -- Returns the last modified date of a file in milliseconds.  If the file
