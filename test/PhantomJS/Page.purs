@@ -1,4 +1,6 @@
-module Test.PhantomJS.Page where
+module Test.PhantomJS.Page
+  ( pageTests
+  ) where
 
 import PhantomJS.Phantom (PHANTOMJS)
 import PhantomJS.Page

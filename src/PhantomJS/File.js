@@ -20,7 +20,9 @@ exports.remove_ = function(filepath) {
       // http://phantomjs.org/api/fs/method/remove.html
       fs.remove(filepath);
     } catch (e) {
-      error(e);
+      // e is undefeind in this situation, so we don't do
+      // error(e);
+      error(new Error("File '" + filepath + "' does not exist."));
     }
     success();
   }
@@ -47,16 +49,12 @@ exports.read_ = function(filepath) {
     try {
       // http://phantomjs.org/api/fs/method/read.html
       var content = fs.read(filepath);
-
-      // if (content == null) {
-      //   throw new Error('File ' + filepath + ' could not be found.')
-      // }
     } catch (e) {
       // e is undefeind in this situation, so we don't do
       // error(e);
       error(new Error("File '" + filepath + "' could not be read."));
     }
-    success("ABC");
+    success(content);
   }
 }
 
