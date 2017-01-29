@@ -14,6 +14,7 @@ liftEff :: forall eff a. Eff eff a -> Aff eff a
 liftEff = EffClass.liftEff
 
 -- | Tests should be run with the purescript docker container
+-- | https://hub.docker.com/r/gyeh/purescript/
 projectDir :: String
 projectDir = "/home/pureuser/src/"
 

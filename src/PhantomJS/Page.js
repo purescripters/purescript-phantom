@@ -32,21 +32,15 @@ exports.open_ = function(page) {
 
 exports.render_ = function(page) {
   return function(filename) {
-    return function(format) {
-      return function(quality) {
-        return function(success, error) {
+    return function(settings) {
+      return function(success, error) {
+        try {
+          // http://phantomjs.org/api/webpage/method/render.html
+          var r = page.render(filename, settings);
 
-          try {
-            // http://phantomjs.org/api/webpage/method/render.html
-            var r = page.render(filename, {
-              format : format,
-              quality : quality
-            });
-
-            success(page);
-          } catch (e) {
-            error(new PhantomPageError("Could not render page to file '" + filename + "'. " + e.message, e.stack));
-          }
+          success(page);
+        } catch (e) {
+          error(new PhantomPageError("Could not render page to file '" + filename + "'. " + e.message, e.stack));
         }
       }
     }
