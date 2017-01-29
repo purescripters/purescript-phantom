@@ -1,26 +1,26 @@
-module ExampleFS where
+module Example.Stream where
 
-import Prelude (Unit, bind, ($), (<>), pure)
+import Prelude (Unit, bind, ($))
 import Control.Monad.Aff (Aff, attempt)
 import Control.Monad.Aff.Console (log, logShow)
 import Data.Maybe (fromMaybe)
 import Data.Either(Either(..))
-import Control.Monad.Eff.Exception(message, stack)
+import Control.Monad.Eff.Exception(stack)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
-import PhantomJS.Stream (PHANTOMJSFS, FileMode(..), open, close, readLine, write, writeLine, withSettings)
+import PhantomJS.File (PHANTOMJSFS, FileMode(..))
+import PhantomJS.Stream (open, close, readLine, write, writeLine, withSettings)
 import PhantomJS.Phantom (PHANTOMJS, exit)
-import Data.Tuple (Tuple(..))
 
 -- Some examples of using PhantomJS.Page module.
 -- Run the following in project root...
 --
--- pulp --watch build --include examples --main Example --to examples-output/test.js
+-- pulp --watch build --include examples --main Example.Stream --to examples-output/stream.js
 --
 -- Then change to the examples-output directory and run the file with phantom.
 --
 -- cd examples-output
--- phantomjs test.js
+-- phantomjs stream.js
 
 main :: forall eff. Aff ( phantomjs :: PHANTOMJS, console :: CONSOLE, phantomjsfs :: PHANTOMJSFS | eff ) Unit
 main = do
@@ -44,8 +44,7 @@ main = do
 
 readFile :: forall eff. Aff ( phantomjs :: PHANTOMJS, console :: CONSOLE, phantomjsfs :: PHANTOMJSFS | eff ) Unit
 readFile = do
-  -- s <- open "test.txt" (forWritingIn "utf8")
-  s <- open "test.txt" (withSettings R "utf8")
+  s <- open "assets/test.txt" (withSettings R "utf8")
   l <- readLine s
   logShow l
   close s
@@ -53,9 +52,8 @@ readFile = do
 
 writeFile :: forall eff. Aff ( phantomjs :: PHANTOMJS, console :: CONSOLE, phantomjsfs :: PHANTOMJSFS | eff ) Unit
 writeFile = do
-  -- s <- open "test.txt" (forWritingIn "utf8")
-  s <- open "test.txt" (withSettings RW "utf8")
-  write s "ap"
-  writeLine s "ap"
-  write s "ap"
+  s <- open "test.txt" (withSettings W "utf8")
+  write s "I can only hope that the original Horace "
+  writeLine s "was taken in by "
+  write s "a kind family."
   close s

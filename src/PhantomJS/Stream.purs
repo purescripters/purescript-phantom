@@ -1,3 +1,5 @@
+-- | This module defines types and functions for working with file streams.
+
 module PhantomJS.Stream
   ( Stream
   , StreamSettings
@@ -58,22 +60,22 @@ foreign import readLine_ :: forall e a.  Stream -> (a -> Maybe a) -> (Maybe a) -
 
 foreign import close_ :: forall e. Stream -> PhantomFSAff e Unit
 
--- Open a file stream
+-- | Open a file stream
 open :: forall e. FilePath -> StreamSettings -> PhantomFSAff e Stream
 open fp fs = open_ fp (FC.write fs)
 
--- Write to a file stream
+-- | Write to a file stream
 write :: forall e. Stream -> String -> PhantomFSAff e Stream
 write = write_
 
--- Write a line to a file stream
+-- | Write a line to a file stream
 writeLine :: forall e. Stream -> String -> PhantomFSAff e Stream
 writeLine = writeLine_
 
--- Read a line from a file stream
+-- | Read a line from a file stream
 readLine :: forall e. Stream -> PhantomFSAff e (Maybe String)
 readLine stream = readLine_ stream Just Nothing
 
--- Close a file stream
+-- | Close a file stream
 close :: forall e. Stream -> PhantomFSAff e Unit
 close = close_
