@@ -19,9 +19,9 @@ import Data.StrMap (StrMap, fromFoldable)
 import Data.Foldable (class Foldable)
 import PhantomJS.Phantom (PHANTOMJS)
 import Data.Foreign (toForeign, Foreign)
-import Data.Foreign.Class (class AsForeign, write)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
+import Control.Monad.Eff (kind Effect)
 
 type URL = String
 type FilePath = String
@@ -48,8 +48,8 @@ instance showRenderFormat :: Show RenderFormat where
   show PPM = "ppm"
   show GIF = "gif"
 
-instance foreignRenderFormat :: AsForeign RenderFormat where
-  write = toForeign <<< show
+toForeignRenderFormat :: RenderFormat -> Foreign
+toForeignRenderFormat = toForeign <<< show
 
 -- | The type and quality of a rendered screenshot
 newtype RenderSettings
@@ -63,10 +63,10 @@ derive instance eqRenderSettings :: Eq RenderSettings
 instance showRenderSettings :: Show RenderSettings where
   show = genericShow
 
-instance asForeignRenderSettings :: AsForeign RenderSettings where
-  write (RenderSettings { format : format, quality : quality }) =
+toForeignRenderSettings :: RenderSettings -> Foreign
+toForeignRenderSettings (RenderSettings { format : format, quality : quality }) =
     toForeign
-      { format : (write format)
+      { format : (toForeignRenderFormat format)
       , quality : quality }
 
 -- | Predefined setting for rendering screenshot as jpeg
@@ -85,7 +85,7 @@ png
   , quality : 100 }
 
 -- | The type of a PhantomJS page context.
-foreign import data Page :: *
+foreign import data Page :: Type
 
 foreign import createPage_ :: forall e. PhantomAff e Page
 
@@ -113,7 +113,7 @@ foreign import render_ :: forall e. Page -> FilePath -> ForeignRenderSettings ->
 
 -- | Renders a screenshot of the given page.
 render :: forall e. Page -> FilePath -> RenderSettings ->  PhantomAff e Page
-render page fp rs = render_ page fp (write rs)
+render page fp rs = render_ page fp (toForeignRenderSettings rs)
 
 
 foreign import injectJs_ :: forall e. Page -> FilePath -> PhantomAff e Page

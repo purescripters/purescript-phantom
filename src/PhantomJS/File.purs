@@ -17,15 +17,15 @@ module PhantomJS.File
   , write
   , read
   , lastModified
+  , toForeignFileMode
   ) where
 
 import Prelude (Unit, class Eq,class Show, show, (<<<))
 import Control.Monad.Aff (Aff)
 import Data.Foreign (toForeign, Foreign)
-import Data.Foreign.Class as FC
-import Data.Foreign.Class (class AsForeign)
 import Data.Generic.Rep (class Generic)
 import Data.Time.Duration (Milliseconds)
+import Control.Monad.Eff (kind Effect)
 
 type Charset = String
 type FilePath = String
@@ -47,10 +47,10 @@ instance showFileMode :: Show FileMode where
   show W = "w"   -- write        -   (create if not exists, overwrite existing)
   show A = "a"   -- append       -   (create if not exists, append to file)
 
-instance foreignFileMode :: AsForeign FileMode where
-  write = toForeign <<< show
+toForeignFileMode :: FileMode -> Foreign
+toForeignFileMode = toForeign <<< show
 
-foreign import data PHANTOMJSFS :: !
+foreign import data PHANTOMJSFS :: Effect
 
 foreign import exists_ :: forall e. FilePath -> PhantomFSAff e Boolean
 
@@ -72,7 +72,7 @@ exists = exists_
 
 -- Writes to a file
 write :: forall e. FilePath -> FileContent -> FileMode -> PhantomFSAff e Unit
-write fp c fm = write_ fp c (FC.write fm)
+write fp c fm = write_ fp c (toForeignFileMode fm)
 
 -- Reads from a file
 read :: forall e. FilePath -> PhantomFSAff e String

@@ -8,3 +8,4 @@
 /.psc-ide-port
 /npm-debug.log
 /.psa-stash
+/purescript-docker

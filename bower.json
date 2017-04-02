@@ -19,7 +19,7 @@
   "dependencies": {
     "purescript-console": "^3.0.0",
     "purescript-prelude": "^3.0.0",
-    "purescript-aff": "^2.0.2",
+    "purescript-aff": "git://github.com/natefaubion/purescript-aff#1ed0d751dd7427074f98d86220566a58572d5aa7",
     "purescript-maps": "^3.0.0",
     "purescript-foreign": "^4.0.0",
     "purescript-generics-rep": "^5.0.0",
