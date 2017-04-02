@@ -6,8 +6,6 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff) as EffClass
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION)
-import Data.Enum (fromEnum)
-import ExitCodes (ExitCode(Success))
 import PhantomJS.Phantom (exit, PHANTOMJS)
 import PhantomJS.File (PHANTOMJSFS)
 import Prelude (($), bind)
@@ -33,5 +31,5 @@ main = launchAff $ runTest do
 
   describe "exit" $ do
     it "should exit" $ do
-      liftEff $ exit (fromEnum Success)
+      liftEff $ exit 0
       assert "failed to exit phantomjs" false
