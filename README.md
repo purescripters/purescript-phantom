@@ -24,10 +24,16 @@ main = do
 
 ## Tests
 
-To run the tests, you'll need the [purescript-docker image](https://github.com/Risto-Stevcev/purescript-docker).  Follow the
-instructions in the comments of `test.sh` to get a working container.  You can then run the tests inside of the container by
-running `./test.sh`, which will run `pulp --watch test` inside the container.
+Assuming you have purescript and phantomjs installed, run the following in the project root...
 
+`PHANTOM_TEST_PATH=$(pwd) pulp test --runtime phantomjs`
+
+Or if you're using [phantomjs-prebuilt](https://www.npmjs.com/package/phantomjs-prebuilt)...
+
+`PHANTOM_TEST_PATH=$(pwd) pulp test --runtime ./node_modules/.bin/phantomjs`
+
+You can also run the tests, in the [purescript-docker image](https://github.com/Risto-Stevcev/purescript-docker).  If you're using docker, follow the instructions in the comments of `test.sh` to get a working container.  You can then run the tests
+inside of the container by running `./test.sh` on the host, which will run `pulp --watch test` inside the container.
 
 ## Examples
 
