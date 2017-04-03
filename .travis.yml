@@ -2,9 +2,9 @@ node_js:
   - "node"
 language: node_js
 env:
-  - HOME=/home/pureuser
-  - PATH=/home/pureuser/purescript:$PATH
   - USER=pureuser
+  - HOME=/home/pureuser
+  - PATH=/home/pureuser/purescript:$PATH  
 install:
   - wget -O $HOME/purescript.tar.gz https://github.com/purescript/purescript/releases/download/v0.11.2/linux64.tar.gz
   - tar -xvf $HOME/purescript.tar.gz -C $HOME/
