@@ -1,6 +1,6 @@
 module Example.Stream where
 
-import Prelude (Unit, bind, ($))
+import Prelude (Unit, bind, ($), discard)
 import Control.Monad.Aff (Aff, attempt)
 import Control.Monad.Aff.Console (log, logShow)
 import Data.Maybe (fromMaybe)
@@ -46,14 +46,14 @@ readFile :: forall eff. Aff ( phantomjs :: PHANTOMJS, console :: CONSOLE, phanto
 readFile = do
   s <- open "assets/test.txt" (withSettings R "utf8")
   l <- readLine s
-  logShow l
+  _ <- logShow l
   close s
 
 
 writeFile :: forall eff. Aff ( phantomjs :: PHANTOMJS, console :: CONSOLE, phantomjsfs :: PHANTOMJSFS | eff ) Unit
 writeFile = do
   s <- open "test.txt" (withSettings W "utf8")
-  write s "I can only hope that the original Horace "
-  writeLine s "was taken in by "
-  write s "a kind family."
+  _ <- write s "I can only hope that the original Horace "
+  _ <- writeLine s "was taken in by "
+  _ <- write s "a kind family."
   close s
