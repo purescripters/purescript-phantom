@@ -1,39 +1,56 @@
 module Test.PhantomJS.Paths
-  ( outputDir
-  , projectRoot
-  , testDir
-  , tempFolder
-  , tempFile
-  , testHtmlFile
-  , testInjectScriptPath
+  ( getOutputDir
+  , getProjectRoot
+  , getTestDir
+  , getTempFolder
+  , getTempFile
+  , getTestHtmlFile
+  , getTestInjectScriptPath
   ) where
 
-import Data.Maybe (fromMaybe)
+import Control.Bind ((>>=))
+import Control.Monad.Eff (Eff)
+import Data.Maybe (Maybe, fromMaybe)
 import Data.Monoid (append)
+import PhantomJS.Phantom (PHANTOMJS)
 import PhantomJS.System (getEnv)
-import Prelude ((<>), (=<<), (<<<), pure, flip, ($))
+import Prelude ((<>), (=<<), (<<<), pure, flip, ($), bind, (<$>))
 
 -- If you're using the purescript-docker container the path will be /home/pureuser
 -- otherwise you can set PHANTOM_TEST_PATH on command line.
 -- e.g. PHANTOM_TEST_PATH=$(pwd) pulp test --runtime phantomjs
-projectRoot :: String
-projectRoot = fromMaybe "/home/pureuser/" (appendTrailingSlash =<< getEnv "PHANTOM_TEST_PATH")
-  where appendTrailingSlash = pure <<< flip append "/"
+getProjectRoot :: forall e. Eff (phantomjs :: PHANTOMJS | e) String
+getProjectRoot = do
+  mpath <- getEnv "PHANTOM_TEST_PATH"
+  pure $ fromMaybe "/home/pureuser/" (appendTrailingSlash <$> mpath)
+  where appendTrailingSlash = (flip append "/")
 
-outputDir :: String
-outputDir = projectRoot <> "output"
+getOutputDir :: forall e. Eff (phantomjs :: PHANTOMJS | e) String
+getOutputDir = do
+  p <- getProjectRoot
+  pure $ p <> "output"
 
-testDir :: String
-testDir = projectRoot <> "test"
+getTestDir :: forall e. Eff (phantomjs :: PHANTOMJS | e) String
+getTestDir = do
+  p <- getProjectRoot
+  pure $ p <> "test"
 
-testInjectScriptPath :: String
-testInjectScriptPath = testDir <> "/assets/sample.js"
+getTestInjectScriptPath :: forall e. Eff (phantomjs :: PHANTOMJS | e) String
+getTestInjectScriptPath = do
+  p <- getTestDir
+  pure $ p <> "/assets/sample.js"
 
-testHtmlFile :: String
-testHtmlFile = projectRoot <> "test/assets/test.html"
+getTestHtmlFile :: forall e. Eff (phantomjs :: PHANTOMJS | e) String
+getTestHtmlFile = do
+  p <- getProjectRoot
+  pure $ p <> "test/assets/test.html"
 
-tempFolder :: String
-tempFolder = projectRoot <> "test/assets/temp/"
+getTempFolder :: forall e. Eff (phantomjs :: PHANTOMJS | e) String
+getTempFolder = do
+  p <- getProjectRoot
+  pure $ p <> "test/assets/temp/"
 
-tempFile :: String
-tempFile = tempFolder <> "temp.txt"
+getTempFile :: forall e. Eff (phantomjs :: PHANTOMJS | e) String
+getTempFile = do
+  p <- getTempFolder
+  pure $ p <> "temp.txt"

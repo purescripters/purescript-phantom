@@ -15,6 +15,7 @@ import Prelude (discard, Unit, ($), bind, (>>=), (>))
 import Test.PhantomJS.File (fileTests)
 import Test.PhantomJS.Page (pageTests)
 import Test.PhantomJS.Phantom (phantomTests)
+import Test.PhantomJS.System (systemTests)
 import Test.Unit (collectResults, collectTests, describe, it, keepErrors)
 import Test.Unit.Assert (assert)
 import Test.Unit.Console (TESTOUTPUT)
@@ -25,6 +26,7 @@ main = do
     phantomTests
     pageTests
     fileTests
+    systemTests
 
   results <- collectResults list
   let failed = keepErrors results
