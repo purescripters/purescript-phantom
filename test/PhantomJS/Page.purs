@@ -2,59 +2,45 @@ module Test.PhantomJS.Page
   ( pageTests
   ) where
 
-import PhantomJS.Phantom (PHANTOMJS)
 import PhantomJS.Page
 import Control.Monad.Aff (Aff, attempt)
-import Control.Monad.Free (Free)
 import Data.Either (isRight, isLeft)
 import PhantomJS.File (PHANTOMJSFS, exists, remove)
-import Prelude (Unit, bind, ($), (<>), (==))
-import Test.Unit (Test, TestF, describe, it)
-import Test.Unit.Assert (shouldEqual, assert)
+import PhantomJS.Phantom (PHANTOMJS)
+import Prelude (bind, ($), (<>), (==), discard)
+import Test.PhantomJS.Paths (getTempFolder, getTestHtmlFile)
+import Test.PhantomJS.Phantom (liftEff)
+import Test.Unit (TestSuite, describe, it)
+import Test.Unit.Assert (assert)
 
--- If you're using the purescript-docker container,
--- otherwise set this to the absolute path of where
--- the project was cloned
-projectRoot :: String
-projectRoot = "/home/pureuser/src/"
-
--- Assuming we're running in project root right now.
--- Should look into using the docker container used by
--- Phantom.Tests
-testHtmlFile :: String
-testHtmlFile = projectRoot <> "test/assets/test.html"
-
-tempFolder :: String
-tempFolder = projectRoot <> "test/assets/temp/"
-
--- testImageRender :: forall a. String -> RenderSettings -> Test a
-testImageRender :: forall eff.
+testImageRender :: forall e.
   String
   -> RenderSettings
-     -> Free
-          (TestF
-             ( phantomjsfs :: PHANTOMJSFS
-             , phantomjs :: PHANTOMJS
-             | eff
-             )
-          )
-          Unit
+     -> TestSuite
+         ( phantomjsfs :: PHANTOMJSFS
+         , phantomjs :: PHANTOMJS
+         | e
+         )
 testImageRender filename renderSettings = do
   it ("should render test.html to " <> filename) do
+    tempFolder <- liftEff $ getTempFolder
+    testHtmlFile <- liftEff $ getTestHtmlFile
+
     let image = tempFolder <> filename
-    attempt $ remove image
+    _ <- attempt $ remove image
     p <- createPage
-    open p testHtmlFile
-    render p image renderSettings
+    _ <- open p testHtmlFile
+    _ <- render p image renderSettings
     fileExists <- (exists image)
-    attempt $ remove image
+    _ <- attempt $ remove image
     assert (tempFolder <> filename <> " is not there.") fileExists
 
-pageTests :: forall eff. Free (TestF (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | eff)) Unit
+pageTests :: forall e. TestSuite (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | e)
 pageTests = do
   describe "PhantomJS.Page" do
     describe "open" do
       it "should open test.html" do
+        testHtmlFile <- liftEff $ getTestHtmlFile
         p <- createPage
         u <- attempt $ open p testHtmlFile
         assert "open returned failure case" (isRight u)
@@ -71,21 +57,24 @@ pageTests = do
 
     describe "inject and evaluate" do
       it "should inject test.js into page" do
+        testHtmlFile <- liftEff $ getTestHtmlFile
         p <- createPage
-        open p testHtmlFile
-        injectJs p "test/assets/return28.js"
-        r <- evaluate p "return28" :: forall e. Aff e Int
+        _ <- open p testHtmlFile
+        _ <- injectJs p "test/assets/return28.js"
+        r <- evaluate p "return28" :: forall e. Aff (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | e) Int
         assert "did not return value 28" (r == 28)
 
       it "should fail injecting a non-existant script." do
+        testHtmlFile <- liftEff $ getTestHtmlFile
         p <- createPage
-        open p testHtmlFile
+        _ <- open p testHtmlFile
         u <- attempt $ injectJs p "does-not-exists.js"
         assert "succeeded to inject the file." (isLeft u)
 
       it "should fail running a non-existant function." do
+        testHtmlFile <- liftEff $ getTestHtmlFile
         p <- createPage
-        open p testHtmlFile
-        injectJs p "test/assets/return28.js"
-        r <- attempt $ evaluate p "doesnotexist" :: forall e. Aff e Int
+        _ <- open p testHtmlFile
+        _ <- injectJs p "test/assets/return28.js"
+        r <- attempt $ evaluate p "doesnotexist" :: forall e. Aff (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | e) Int
         assert "did run doesnotexist()" (isLeft r)
