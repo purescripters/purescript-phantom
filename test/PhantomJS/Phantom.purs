@@ -2,7 +2,6 @@ module Test.PhantomJS.Phantom where
 
 import PhantomJS.Phantom
 import Control.Monad.Aff (Aff)
-import Control.Monad.Aff.Console (log)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff) as EffClass
 import Prelude (bind, ($), (*>), discard)

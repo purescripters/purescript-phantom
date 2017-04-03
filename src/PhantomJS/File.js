@@ -39,7 +39,6 @@ exports.write_ = function(filepath) {
           error(e);
         }
         success();
-
       }
     }
   }
@@ -56,7 +55,6 @@ exports.read_ = function(filepath) {
       error(new Error("File '" + filepath + "' could not be read."));
     }
     success(content);
-
   }
 }
 
@@ -72,7 +70,6 @@ exports.lastModified_ = function(filepath) {
       } catch (e) {
         error(e);
       }
-
       success(instant);
     }
   }

@@ -13,14 +13,13 @@ import Test.PhantomJS.Phantom (liftEff)
 import Test.Unit (TestSuite, describe, it)
 import Test.Unit.Assert (assert)
 
--- testImageRender :: forall a. String -> RenderSettings -> Test a
-testImageRender :: forall eff.
+testImageRender :: forall e.
   String
   -> RenderSettings
      -> TestSuite
          ( phantomjsfs :: PHANTOMJSFS
          , phantomjs :: PHANTOMJS
-         | eff
+         | e
          )
 testImageRender filename renderSettings = do
   it ("should render test.html to " <> filename) do
@@ -36,7 +35,7 @@ testImageRender filename renderSettings = do
     _ <- attempt $ remove image
     assert (tempFolder <> filename <> " is not there.") fileExists
 
-pageTests :: forall eff. TestSuite (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | eff)
+pageTests :: forall e. TestSuite (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | e)
 pageTests = do
   describe "PhantomJS.Page" do
     describe "open" do
@@ -62,7 +61,7 @@ pageTests = do
         p <- createPage
         _ <- open p testHtmlFile
         _ <- injectJs p "test/assets/return28.js"
-        r <- evaluate p "return28" :: forall e. Aff _ Int
+        r <- evaluate p "return28" :: forall e. Aff (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | e) Int
         assert "did not return value 28" (r == 28)
 
       it "should fail injecting a non-existant script." do
@@ -77,5 +76,5 @@ pageTests = do
         p <- createPage
         _ <- open p testHtmlFile
         _ <- injectJs p "test/assets/return28.js"
-        r <- attempt $ evaluate p "doesnotexist" :: forall e. Aff _ Int
+        r <- attempt $ evaluate p "doesnotexist" :: forall e. Aff (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | e) Int
         assert "did run doesnotexist()" (isLeft r)

@@ -3,14 +3,11 @@ module Test.PhantomJS.System
   ) where
 
 import PhantomJS.System
-import Control.Monad.Aff (Aff, attempt)
-import Data.Either (isRight, isLeft)
 import Data.Maybe (Maybe(..))
 import Data.String (length)
-import PhantomJS.File (PHANTOMJSFS, exists, remove)
+import PhantomJS.File (PHANTOMJSFS)
 import PhantomJS.Phantom (PHANTOMJS)
 import Prelude (bind, discard, ($), (&&), (/=), (<>), (==), (>))
-import Test.PhantomJS.Paths (getTempFolder, getTestHtmlFile)
 import Test.PhantomJS.Phantom (liftEff)
 import Test.Unit (TestSuite, describe, it)
 import Test.Unit.Assert (assert)
