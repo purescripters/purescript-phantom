@@ -19,7 +19,7 @@
   "dependencies": {
     "purescript-console": "^3.0.0",
     "purescript-prelude": "^3.0.0",
-    "purescript-aff": "git://github.com/natefaubion/purescript-aff#1ed0d751dd7427074f98d86220566a58572d5aa7",
+    "purescript-aff": "^3.0.0",
     "purescript-maps": "^3.0.0",
     "purescript-foreign": "^4.0.0",
     "purescript-generics-rep": "^5.0.0",
@@ -27,6 +27,6 @@
   },
   "devDependencies": {
     "purescript-psci-support": "^3.0.0",
-    "purescript-test-unit": "^10.0.0"
+    "purescript-test-unit": "git://github.com/dgendill/purescript-test-unit#2b0eef378f284545d20cd5040556f6aaf962e269"
   }
 }
