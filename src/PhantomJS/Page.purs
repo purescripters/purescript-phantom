@@ -48,6 +48,8 @@ instance showRenderFormat :: Show RenderFormat where
   show PPM = "ppm"
   show GIF = "gif"
 
+-- | Used to convert RenderFormat to a foreign type
+-- | that can be passed into native phantomjs functions.
 toForeignRenderFormat :: RenderFormat -> Foreign
 toForeignRenderFormat = toForeign <<< show
 
@@ -63,6 +65,8 @@ derive instance eqRenderSettings :: Eq RenderSettings
 instance showRenderSettings :: Show RenderSettings where
   show = genericShow
 
+-- | Used to convert RenderSettings to a foreign type
+-- | that can be passed into native phantomjs functions.
 toForeignRenderSettings :: RenderSettings -> Foreign
 toForeignRenderSettings (RenderSettings { format : format, quality : quality }) =
     toForeign

@@ -47,6 +47,8 @@ instance showFileMode :: Show FileMode where
   show W = "w"   -- write        -   (create if not exists, overwrite existing)
   show A = "a"   -- append       -   (create if not exists, append to file)
 
+-- | Used to convert a FileMode to a foreign type
+-- | that can be passed into native phantomjs functions.
 toForeignFileMode :: FileMode -> Foreign
 toForeignFileMode = toForeign <<< show
 

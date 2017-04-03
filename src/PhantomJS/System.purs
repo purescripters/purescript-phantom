@@ -6,7 +6,6 @@ module PhantomJS.System
   , getEnv
   ) where
 
-import Prelude
 import Control.Monad.Eff (Eff)
 import Data.Maybe (Maybe(..))
 import PhantomJS.Phantom (PHANTOMJS)
