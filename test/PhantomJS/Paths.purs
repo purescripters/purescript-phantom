@@ -19,7 +19,7 @@ outputDir :: String
 outputDir = projectRoot <> "output"
 
 testDir :: String
-testDir = projectRoot <> "test/"
+testDir = projectRoot <> "test"
 
 testInjectScriptPath :: String
 testInjectScriptPath = testDir <> "/assets/sample.js"

@@ -1,14 +1,13 @@
 module Test.PhantomJS.Phantom where
 
-import Prelude (Unit, bind, ($), (*>), (<>), discard)
+import Prelude (bind, ($), (*>), discard)
 import PhantomJS.Phantom
-import Control.Monad.Free (Free)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff) as EffClass
-import Test.Unit (TestF, describe, it, TestSuite)
+import Test.Unit (describe, it, TestSuite)
 import Test.Unit.Assert (shouldEqual)
-import Test.PhantomJS.Paths (projectRoot, testInjectScriptPath, outputDir)
+import Test.PhantomJS.Paths (testInjectScriptPath, outputDir)
 
 liftEff :: forall eff a. Eff eff a -> Aff eff a
 liftEff = EffClass.liftEff

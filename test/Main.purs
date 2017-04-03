@@ -1,20 +1,14 @@
 module Test.Main where
 
-import Control.Monad.Aff (Aff, launchAff, Canceler, runAff)
 import Control.Monad.Aff.AVar (AVAR)
-import Control.Monad.Aff.Console (logShow)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (liftEff) as EffClass
 import Control.Monad.Eff.Console (CONSOLE)
-import Control.Monad.Eff.Exception (EXCEPTION)
-import PhantomJS.Phantom (exit, PHANTOMJS)
+import PhantomJS.Phantom (PHANTOMJS)
 import PhantomJS.File (PHANTOMJSFS)
-import Prelude (($), discard, Unit)
+import Prelude (discard, Unit)
 import Test.PhantomJS.Page (pageTests)
 import Test.PhantomJS.File (fileTests)
 import Test.PhantomJS.Phantom (phantomTests)
-import Test.Unit (describe, it)
-import Test.Unit.Assert (assert)
 import Test.Unit.Main (runTest)
 import Test.Unit.Console (TESTOUTPUT)
 --import Test.Unit.Output.Simple (runTest)
