@@ -1,31 +1,17 @@
 module Test.PhantomJS.Phantom where
 
-import Prelude (Unit, bind, ($), (*>), (<>))
+import Prelude (Unit, bind, ($), (*>), (<>), discard)
 import PhantomJS.Phantom
 import Control.Monad.Free (Free)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff) as EffClass
-import Test.Unit (TestF, describe, it)
+import Test.Unit (TestF, describe, it, TestSuite)
 import Test.Unit.Assert (shouldEqual)
-
+import Test.PhantomJS.Paths (projectRoot, testInjectScriptPath, outputDir)
 
 liftEff :: forall eff a. Eff eff a -> Aff eff a
 liftEff = EffClass.liftEff
-
--- | Tests should be run with the purescript docker container
--- | https://hub.docker.com/r/gyeh/purescript/
-projectDir :: String
-projectDir = "/home/pureuser/src/"
-
-outputDir :: String
-outputDir = projectDir <> "output"
-
-testDir :: String
-testDir = projectDir <> "test"
-
-scriptPath :: String
-scriptPath = testDir <> "/sample.js"
 
 expectedVersion :: Version
 expectedVersion = Version { major: 2, minor: 1, patch: 1 }
@@ -42,7 +28,7 @@ sampleCookie = Cookie
 
 foreign import isScriptInjected :: forall eff. Eff (phantomjs :: PHANTOMJS | eff) Boolean
 
-phantomTests :: forall eff. Free (TestF (phantomjs :: PHANTOMJS | eff)) Unit
+phantomTests :: forall eff. TestSuite (phantomjs :: PHANTOMJS | eff)
 phantomTests = do
   describe "cookiesEnabled" do
     it "should return true by default for isCookiesEnabled" do
@@ -103,7 +89,7 @@ phantomTests = do
       cookiesBefore <- liftEff cookies
       cookiesBefore `shouldEqual` [sampleCookie]
 
-      liftEff $ deleteCookie "foo"
+      _ <- liftEff $ deleteCookie "foo"
       cookiesAfter <- liftEff cookies
       cookiesAfter `shouldEqual` []
 
@@ -112,7 +98,7 @@ phantomTests = do
       isScriptInjectedBefore <- liftEff isScriptInjected
       isScriptInjectedBefore `shouldEqual` false
 
-      isSuccess <- liftEff $ injectJs scriptPath
+      isSuccess <- liftEff $ injectJs testInjectScriptPath
       isSuccess `shouldEqual` true
 
       isScriptInjectedAfter <- liftEff isScriptInjected

@@ -9,3 +9,5 @@
 /npm-debug.log
 /.psa-stash
 /purescript-docker
+/.npm
+/.bash_history
