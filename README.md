@@ -6,6 +6,12 @@ Purescript bindings to PhantomJS
 
 [![Build Status](https://travis-ci.org/dgendill/purescript-phantom.svg?branch=master)](https://travis-ci.org/dgendill/purescript-phantom)
 
+* [Motive](#motive)
+* [QuickStart](#quickstart)
+* [Compatibility](#compatibility)
+* [Tests](#tests)
+* [Examples](#examples)
+
 ## Motive
 
 Purescript code is pure and total, so most testing is usually a form of documentation or done with generative tests. However,
@@ -26,6 +32,13 @@ main = do
   version >>= logShow
   exit (fromEnum Success)
 ```
+
+## Compatibility
+
+| Purescript | purescript-phantom | phantomjs
+|------------|------------------------|
+| v0.11.0 | v2.x.x | 2.1.x |
+| v0.10.1 - v0.10.7    | v1.x.x | 2.1.x |
 
 ## Tests
 
