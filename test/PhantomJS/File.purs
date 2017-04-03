@@ -3,16 +3,12 @@ module Test.PhantomJS.File
   ) where
 
 import PhantomJS.Phantom (PHANTOMJS)
-import Control.Monad.Aff (Aff, attempt)
-import Control.Monad.Free (Free)
 import Data.Either (isRight, isLeft, Either(Right))
 import PhantomJS.File (PHANTOMJSFS, exists, remove, write, read, FileMode(..))
-import Prelude (Unit, bind, ($), (<>), (==), map, unit, pure, discard)
-import Test.Unit (Test, TestF, describe, it, TestSuite)
-import Test.Unit.Assert (shouldEqual, assert)
-import Data.Foreign (readString)
-import Control.Monad.Except(runExcept)
-import Test.PhantomJS.Paths (projectRoot, testHtmlFile, tempFolder, tempFile)
+import Prelude (bind, (==), discard)
+import Test.Unit (describe, it, TestSuite)
+import Test.Unit.Assert (assert)
+import Test.PhantomJS.Paths (tempFile)
 
 fileTests :: forall eff. TestSuite (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | eff)
 fileTests = do

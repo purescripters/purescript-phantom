@@ -9,22 +9,19 @@ import Control.Monad.Free (Free)
 import Data.Either (isRight, isLeft)
 import PhantomJS.File (PHANTOMJSFS, exists, remove)
 import Prelude (Unit, bind, ($), (<>), (==), discard)
-import Test.Unit (Test, TestF, describe, it, TestSuite)
-import Test.Unit.Assert (shouldEqual, assert)
-import Test.PhantomJS.Paths (projectRoot, tempFolder, testHtmlFile)
+import Test.Unit (TestSuite, describe, it, TestSuite)
+import Test.Unit.Assert (assert)
+import Test.PhantomJS.Paths (tempFolder, testHtmlFile)
 
 -- testImageRender :: forall a. String -> RenderSettings -> Test a
 testImageRender :: forall eff.
   String
   -> RenderSettings
-     -> Free
-          (TestF
-             ( phantomjsfs :: PHANTOMJSFS
-             , phantomjs :: PHANTOMJS
-             | eff
-             )
-          )
-          Unit
+     -> TestSuite
+         ( phantomjsfs :: PHANTOMJSFS
+         , phantomjs :: PHANTOMJS
+         | eff
+         )
 testImageRender filename renderSettings = do
   it ("should render test.html to " <> filename) do
     let image = tempFolder <> filename
