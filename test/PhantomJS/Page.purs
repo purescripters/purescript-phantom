@@ -5,11 +5,10 @@ module Test.PhantomJS.Page
 import PhantomJS.Phantom (PHANTOMJS)
 import PhantomJS.Page
 import Control.Monad.Aff (Aff, attempt)
-import Control.Monad.Free (Free)
 import Data.Either (isRight, isLeft)
 import PhantomJS.File (PHANTOMJSFS, exists, remove)
-import Prelude (Unit, bind, ($), (<>), (==), discard)
-import Test.Unit (TestSuite, describe, it, TestSuite)
+import Prelude (bind, ($), (<>), (==), discard)
+import Test.Unit (TestSuite, describe, it)
 import Test.Unit.Assert (assert)
 import Test.PhantomJS.Paths (tempFolder, testHtmlFile)
 

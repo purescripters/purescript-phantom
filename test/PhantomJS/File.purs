@@ -3,7 +3,6 @@ module Test.PhantomJS.File
   ) where
 
 import PhantomJS.Phantom (PHANTOMJS)
-import Data.Either (isRight, isLeft, Either(Right))
 import PhantomJS.File (PHANTOMJSFS, exists, remove, write, read, FileMode(..))
 import Prelude (bind, (==), discard)
 import Test.Unit (describe, it, TestSuite)

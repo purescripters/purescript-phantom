@@ -3,6 +3,7 @@
 var fs = require('fs');
 
 exports.exists_ = function(filepath) {
+  console.log(filepath);
   return function(success, error) {
     try {
       // http://phantomjs.org/api/fs/method/exists.html
@@ -39,6 +40,7 @@ exports.write_ = function(filepath) {
           error(e);
         }
         success();
+
       }
     }
   }
@@ -55,6 +57,7 @@ exports.read_ = function(filepath) {
       error(new Error("File '" + filepath + "' could not be read."));
     }
     success(content);
+
   }
 }
 
@@ -66,9 +69,11 @@ exports.lastModified_ = function(filepath) {
         var modified = fs.lastModified(filepath);
         if (modified == null) throw new Error(filepath + ' does not exist.');
         var instant = modified.toTime();
+
       } catch (e) {
         error(e);
       }
+
       success(instant);
     }
   }
