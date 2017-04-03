@@ -1,7 +1,5 @@
 cache:
   directories:
-    - /home/pureuser/node_modules
-    - /home/pureuser/bower_components
     - travis_phantomjs
 node_js:
   - "node"
@@ -13,13 +11,10 @@ install:
   - wget -O $HOME/purescript.tar.gz https://github.com/purescript/purescript/releases/download/v0.11.2/linux64.tar.gz
   - tar -xvf $HOME/purescript.tar.gz -C $HOME/
   - chmod a+x $HOME/purescript
-  - sudo cp -r $TRAVIS_BUILD_DIR /home/pureuser
-  - sudo chmod -R 777 /home/pureuser
-  - cd /home/pureuser
   - npm install -g pulp bower
   - bower install
 script:
-  - pulp test --runtime phantomjs
+  - PHANTOM_TEST_PATH=$(pwd) pulp test --runtime phantomjs
 before_install:
   - "export PHANTOMJS_VERSION=2.1.1"
   - "export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH"

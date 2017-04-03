@@ -4,6 +4,8 @@ Purescript bindings to PhantomJS
 
 ![PhantomJS logo](https://raw.githubusercontent.com/Risto-Stevcev/purescript-phantom/master/logo.png)
 
+[![Build Status](https://travis-ci.org/dgendill/purescript-phantom.svg?branch=master)](https://travis-ci.org/dgendill/purescript-phantom)
+
 ## Motive
 
 Purescript code is pure and total, so most testing is usually a form of documentation or done with generative tests. However, occasionally tests need to test FFI bindings, which is where PhantomJS comes in handy. If you need to test some code that deals with `Window`, or the DOM, or some web APIs, these bindings come in handy. It can be used as a simpler replacement to the karma test-runner framework.
