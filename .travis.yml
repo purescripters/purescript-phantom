@@ -1,9 +1,20 @@
+cache:
+  directories:
+    - travis_phantomjs
 node_js:
   - "node"
 language: node_js
 sudo: required
 env:
   - PATH=$HOME/purescript:$PATH
+before_install:
+  # Upgrade PhantomJS to v2.1.1.
+  - "export PHANTOMJS_VERSION=2.1.1"
+  - "export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi"
+  - "phantomjs --version"
 install:
   - wget -O $HOME/purescript.tar.gz https://github.com/purescript/purescript/releases/download/v0.11.2/linux64.tar.gz
   - tar -xvf $HOME/purescript.tar.gz -C $HOME/
@@ -12,7 +23,6 @@ install:
   - sudo chmod 777 /home/pureuser
   - cd /home/pureuser
   - npm install -g pulp bower
-  - npm install
   - bower install
 script:
   - pulp test --runtime phantomjs
