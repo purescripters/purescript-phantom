@@ -35,10 +35,10 @@ main = do
 
 ## Compatibility
 
-| Purescript | purescript-phantom | phantomjs
-|------------|------------------------|
-| v0.11.0 | v2.x.x | 2.1.x |
-| v0.10.1 - v0.10.7    | v1.x.x | 2.1.x |
+Purescript | purescript-phantom | phantomjs
+-----------|--------------------|-----
+v0.11.0 | v2.x.x | 2.1.x
+v0.10.1 - v0.10.7| v1.x.x | 2.1.x
 
 ## Tests
 
