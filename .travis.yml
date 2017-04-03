@@ -1,6 +1,7 @@
 node_js:
   - "node"
 language: node_js
+sudo: required
 env:
   - USER=pureuser
   - HOME=/home/pureuser
