@@ -8,12 +8,17 @@ module Test.PhantomJS.Paths
   , testInjectScriptPath
   ) where
 
-import Prelude ((<>))
--- If you're using the purescript-docker container,
--- otherwise set this to the absolute path of where
--- the project was cloned
+import Data.Maybe (fromMaybe)
+import Data.Monoid (append)
+import PhantomJS.System (getEnv)
+import Prelude ((<>), (=<<), (<<<), pure, flip, ($))
+
+-- If you're using the purescript-docker container the path will be /home/pureuser
+-- otherwise you can set PHANTOM_TEST_PATH on command line.
+-- e.g. PHANTOM_TEST_PATH=$(pwd) pulp test --runtime phantomjs
 projectRoot :: String
-projectRoot = "/home/pureuser/"
+projectRoot = fromMaybe "/home/pureuser/" (appendTrailingSlash =<< getEnv "PHANTOM_TEST_PATH")
+  where appendTrailingSlash = pure <<< flip append "/"
 
 outputDir :: String
 outputDir = projectRoot <> "output"
@@ -24,9 +29,6 @@ testDir = projectRoot <> "test"
 testInjectScriptPath :: String
 testInjectScriptPath = testDir <> "/assets/sample.js"
 
--- Assuming we're running in project root right now.
--- Should look into using the docker container used by
--- Phantom.Tests
 testHtmlFile :: String
 testHtmlFile = projectRoot <> "test/assets/test.html"
 

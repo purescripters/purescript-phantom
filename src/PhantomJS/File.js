@@ -3,7 +3,6 @@
 var fs = require('fs');
 
 exports.exists_ = function(filepath) {
-  console.log(filepath);
   return function(success, error) {
     try {
       // http://phantomjs.org/api/fs/method/exists.html

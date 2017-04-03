@@ -16,13 +16,13 @@ fileTests = do
       it "should write to temp.txt" do
         write tempFile "ABC" W
         a <- exists tempFile
-        assert "the file wasn't created." (a == true)
+        assert "temp.txt wasn't created." (a == true)
 
       it "should read 'ABC' from the file." do
         c <- read tempFile
-        assert "the value 'ABC' wasn't in the file." (c == "ABC")
+        assert "the value 'ABC' wasn't in temp.txt." (c == "ABC")
 
       it "should remove the file" do
         remove tempFile
         b <- exists tempFile
-        assert "the file wasn't removed." (b == false)
+        assert "temp.txt wasn't removed." (b == false)
