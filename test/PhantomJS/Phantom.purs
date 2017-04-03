@@ -1,13 +1,14 @@
 module Test.PhantomJS.Phantom where
 
-import Prelude (bind, ($), (*>), discard)
 import PhantomJS.Phantom
 import Control.Monad.Aff (Aff)
+import Control.Monad.Aff.Console (log)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff) as EffClass
+import Prelude (bind, ($), (*>), discard)
+import Test.PhantomJS.Paths (getOutputDir, getTestInjectScriptPath)
 import Test.Unit (describe, it, TestSuite)
 import Test.Unit.Assert (shouldEqual)
-import Test.PhantomJS.Paths (testInjectScriptPath, outputDir)
 
 liftEff :: forall eff a. Eff eff a -> Aff eff a
 liftEff = EffClass.liftEff
@@ -51,6 +52,7 @@ phantomTests = do
   describe "getLibraryPath" do
     it "should get the library path" do
       libraryPath <- liftEff getLibraryPath
+      outputDir <- liftEff getOutputDir
       libraryPath `shouldEqual` outputDir
 
   describe "setLibraryPath" do
@@ -60,6 +62,7 @@ phantomTests = do
       libraryPath `shouldEqual` newPath
 
     it "should revert it back to the default value" do
+      outputDir <- liftEff getOutputDir
       libraryPath <- liftEff $ (setLibraryPath outputDir) *> getLibraryPath
       libraryPath `shouldEqual` outputDir
 
@@ -94,9 +97,11 @@ phantomTests = do
 
   describe "injectJs" do
     it "should inject a script" do
-      isScriptInjectedBefore <- liftEff isScriptInjected
-      isScriptInjectedBefore `shouldEqual` false
 
+      testInjectScriptPath <- liftEff getTestInjectScriptPath
+      isScriptInjectedBefore <- liftEff isScriptInjected
+
+      isScriptInjectedBefore `shouldEqual` false
       isSuccess <- liftEff $ injectJs testInjectScriptPath
       isSuccess `shouldEqual` true
 

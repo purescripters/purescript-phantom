@@ -4,7 +4,6 @@ cache:
 node_js:
   - "node"
 language: node_js
-sudo: required
 env:
   - PATH=$HOME/purescript:$PATH
 install:

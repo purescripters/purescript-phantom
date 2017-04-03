@@ -7,7 +7,9 @@ module PhantomJS.System
   ) where
 
 import Prelude
+import Control.Monad.Eff (Eff)
 import Data.Maybe (Maybe(..))
+import PhantomJS.Phantom (PHANTOMJS)
 
 type OS =
   { architecture :: String
@@ -16,16 +18,16 @@ type OS =
 
 -- | Get the architecture, name, and version of the
 -- | operating system.
-foreign import os :: OS
+foreign import os :: forall e. Eff (phantomjs :: PHANTOMJS | e) OS
 
 -- | fold over the keys and values of the system environment variables.
 -- | First parameter is key, second is value
-foreign import foldEnv :: forall a. (a -> String -> String -> a) -> a -> a
+foreign import foldEnv :: forall e a. (a -> String -> String -> a) -> a -> Eff (phantomjs :: PHANTOMJS | e) a
 
-foreign import getEnv_ :: String -> (String -> Maybe String) -> (Maybe String) -> Maybe String
+foreign import getEnv_ :: forall e. String -> (String -> Maybe String) -> (Maybe String) -> Eff (phantomjs :: PHANTOMJS | e) (Maybe String)
 
-getEnv :: String -> Maybe String
+getEnv :: forall e. String -> Eff (phantomjs :: PHANTOMJS | e) (Maybe String)
 getEnv key = getEnv_ key Just Nothing
 
 -- | The PID (Process ID) for the currently executing PhantomJS process.
-foreign import pid :: Int
+foreign import pid :: forall e. Eff (phantomjs :: PHANTOMJS | e) Int
