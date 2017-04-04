@@ -18,9 +18,9 @@ module PhantomJS.Phantom
   ) where
 
 import Prelude (class Eq, class Show, Unit, pure, show, map, (>>=), (<<<), (<>), (==), (&&))
-import Control.Monad.Eff (Eff)
+import Control.Monad.Eff (Eff, kind Effect)
 
-foreign import data PHANTOMJS :: !
+foreign import data PHANTOMJS :: Effect
 
 type CookieRec =
   { domain   :: String

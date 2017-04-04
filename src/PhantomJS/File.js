@@ -66,6 +66,7 @@ exports.lastModified_ = function(filepath) {
         var modified = fs.lastModified(filepath);
         if (modified == null) throw new Error(filepath + ' does not exist.');
         var instant = modified.toTime();
+
       } catch (e) {
         error(e);
       }
