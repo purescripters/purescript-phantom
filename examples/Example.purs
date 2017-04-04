@@ -1,6 +1,6 @@
 module Example where
 
-import Prelude (Unit, bind, ($), (<>), pure)
+import Prelude (Unit, bind, ($), (<>), pure, discard)
 import Control.Monad.Aff (Aff, attempt)
 import Control.Monad.Aff.Console (log, logShow)
 import Data.Maybe (fromMaybe)
@@ -25,11 +25,11 @@ import Data.Tuple (Tuple(..))
 main :: forall eff. Aff ( console :: CONSOLE, phantomjs :: PHANTOMJS | eff ) Unit
 main = do
 
-  log "--------"
+  _ <- log "--------"
   a <- attempt $ screenshotRedPage
   case a of
-    Left err ->  do
-      log $ ("Error: " <> (message err))
+    Left err -> do
+      _ <- log $ ("Error: " <> (message err))
       log $ "Stack: " <> (fromMaybe "No stack trace." (stack err))
     Right val -> do
       log "Screenshot with red background captured."
@@ -60,33 +60,33 @@ main = do
 failureFunction :: forall eff. Aff ( phantomjs :: PHANTOMJS, console :: CONSOLE | eff ) Page
 failureFunction = do
   page <- createPage
-  customHeadersRaw page [
+  _ <- customHeadersRaw page [
     Tuple "user-agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36"
   ]
-  log ("Fetching page...")
-  open page "http://eawefawfewaexample.com"
-  injectJs page "assets/fileDoesNotExist.js"
+  _ <- log ("Fetching page...")
+  _ <- open page "http://eawefawfewaexample.com"
+  _ <- injectJs page "assets/fileDoesNotExist.js"
   render page "pageRender.png" png
 
 screenshotRedPage :: forall eff. Aff ( phantomjs :: PHANTOMJS, console :: CONSOLE | eff ) Page
 screenshotRedPage = do
   page <- createPage
-  customHeadersRaw page [
+  _ <- customHeadersRaw page [
     Tuple "user-agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36"
   ]
-  log ("Fetching page...")
-  open page "http://example.com"
-  injectJs page "assets/backgroundRed.js"
+  _ <- log ("Fetching page...")
+  _ <- open page "http://example.com"
+  _ <- injectJs page "assets/backgroundRed.js"
   render page "pageRender.png" png
 
 getParagraphsFromPage :: forall eff. Aff ( phantomjs :: PHANTOMJS, console :: CONSOLE | eff ) (Array String)
 getParagraphsFromPage = do
   page <- createPage
-  customHeadersRaw page [
+  _ <- customHeadersRaw page [
     Tuple "user-agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36"
   ]
-  log ("Fetching page...")
-  open page "http://example.com"
-  injectJs page "assets/getParagraphContent.js"
-  content <- evaluate page "getParagraphContent" :: forall e. Aff e (Array String)
+  _ <- log ("Fetching page...")
+  _ <- open page "http://example.com"
+  _ <- injectJs page "assets/getParagraphContent.js"
+  content <- evaluate page "getParagraphContent" :: Aff _ (Array String)
   pure content
