@@ -27,6 +27,6 @@
   },
   "devDependencies": {
     "purescript-psci-support": "^3.0.0",
-    "purescript-test-unit": "git://github.com/dgendill/purescript-test-unit#2b0eef378f284545d20cd5040556f6aaf962e269"
+    "purescript-test-unit": "^11.0.0"
   }
 }

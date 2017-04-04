@@ -2,7 +2,7 @@ cache:
   directories:
     - travis_phantomjs
 node_js:
-  - "7"
+  - "7.7"
 language: node_js
 env:
   - PATH=$HOME/purescript:$PATH
