@@ -13,12 +13,10 @@ module PhantomJS.Stream
 
 import Prelude (Unit, class Show)
 import Data.Foreign (toForeign, Foreign)
-import Data.Foreign.Class as FC
-import Data.Foreign.Class (class AsForeign)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
-import PhantomJS.File (FileMode, Charset, FilePath, PhantomFSAff)
+import PhantomJS.File (FileMode, Charset, FilePath, PhantomFSAff, toForeignFileMode)
 
 type ForeignStreamSettings = Foreign
 
@@ -34,11 +32,11 @@ derive instance genericStreamSettings :: Generic StreamSettings _
 instance showStreamSettings :: Show StreamSettings where
   show = genericShow
 
-instance asForeignStreamSettings :: AsForeign StreamSettings where
-  write (StreamSettings { mode : filemode, charset : charset }) =
+toForeignStreamSettings :: StreamSettings -> Foreign
+toForeignStreamSettings (StreamSettings { mode : filemode, charset : charset }) =
     toForeign
-      { mode : (FC.write filemode)
-      , charset : (FC.write charset) }
+      { mode : (toForeignFileMode filemode)
+      , charset : (toForeign charset) }
 
 -- | Helper for creating a StreamSettings type
 withSettings :: FileMode -> Charset -> StreamSettings
@@ -48,7 +46,7 @@ withSettings fm charset =
   , charset : charset
   }
 
-foreign import data Stream :: *
+foreign import data Stream :: Type
 
 foreign import open_ :: forall e. FilePath -> ForeignStreamSettings -> PhantomFSAff e Stream
 
@@ -62,7 +60,7 @@ foreign import close_ :: forall e. Stream -> PhantomFSAff e Unit
 
 -- | Open a file stream
 open :: forall e. FilePath -> StreamSettings -> PhantomFSAff e Stream
-open fp fs = open_ fp (FC.write fs)
+open fp fs = open_ fp (toForeignStreamSettings fs)
 
 -- | Write to a file stream
 write :: forall e. Stream -> String -> PhantomFSAff e Stream
