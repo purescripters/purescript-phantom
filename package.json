@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Risto-Stevcev/purescript-phantom.git"
+    "url": "git+https://github.com/purescripters/purescript-phantom.git"
   },
   "keywords": [
     "purescript",
@@ -20,9 +20,9 @@
   "author": "Risto Stevcev",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Risto-Stevcev/purescript-phantom/issues"
+    "url": "https://github.com/purescripters/purescript-phantom/issues"
   },
-  "homepage": "https://github.com/Risto-Stevcev/purescript-phantom#readme",
+  "homepage": "https://github.com/purescripters/purescript-phantom#readme",
   "devDependencies": {
     "phantomjs-prebuilt": "2.1.14"
   }

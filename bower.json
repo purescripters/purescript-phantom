@@ -11,10 +11,10 @@
     "examples",
     "examples-output"
   ],
-  "homepage": "https://github.com/Risto-Stevcev/purescript-phantom#readme",
+  "homepage": "https://github.com/purescripters/purescript-phantom#readme",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Risto-Stevcev/purescript-phantom.git"
+    "url": "git://github.com/purescripters/purescript-phantom.git"
   },
   "dependencies": {
     "purescript-console": "^3.0.0",
