@@ -3,11 +3,12 @@ module Test.PhantomJS.Page
   ) where
 
 import PhantomJS.Page
+
 import Control.Monad.Aff (Aff, attempt)
 import Data.Either (isRight, isLeft)
 import PhantomJS.File (PHANTOMJSFS, exists, remove)
 import PhantomJS.Phantom (PHANTOMJS)
-import Prelude (bind, ($), (<>), (==), discard)
+import Prelude (bind, discard, ($), (<>), (==))
 import Test.PhantomJS.Paths (getTempFolder, getTestHtmlFile)
 import Test.PhantomJS.Phantom (liftEff)
 import Test.Unit (TestSuite, describe, it)
@@ -43,8 +44,8 @@ pageTests = do
         testHtmlFile <- liftEff $ getTestHtmlFile
         p <- createPage
         u <- attempt $ open p testHtmlFile
-        assert "open returned failure case" (isRight u)
-
+        assert "open returned failure case" (isRight u)    
+    
       it "should fail when local asset not found." do
         p <- createPage
         u <- attempt $ open p "test-not-found.html"

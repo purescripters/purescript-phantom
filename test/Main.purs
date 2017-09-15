@@ -1,13 +1,16 @@
 module Test.Main where
 
-import Control.Monad.Aff (Aff)
-import Control.Monad.Aff.AVar (AVAR)
+import Control.Monad.Aff (message, runAff_)
+import Control.Monad.Aff.AVar (AVAR, makeEmptyVar)
+import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (CONSOLE)
+import Control.Monad.Eff.Console (CONSOLE, log)
+import Control.Monad.Eff.Exception (stack)
+import Data.Either (Either(..))
 import Data.List (length)
 import PhantomJS.File (PHANTOMJSFS)
 import PhantomJS.Phantom (PHANTOMJS, exit)
-import Prelude (discard, Unit, ($), bind, (>))
+import Prelude (Unit, bind, discard, show, ($), (<>), (>))
 import Test.PhantomJS.File (fileTests)
 import Test.PhantomJS.Page (pageTests)
 import Test.PhantomJS.Phantom (phantomTests)
@@ -16,7 +19,7 @@ import Test.Unit (collectResults, keepErrors)
 import Test.Unit.Output.Simple (runTest)
 
 main :: forall e.
-        Aff
+        Eff
           ( console :: CONSOLE
           , avar :: AVAR
           , phantomjs :: PHANTOMJS
@@ -24,7 +27,13 @@ main :: forall e.
           | e
           )
           Unit
-main = do
+main = runAff_ (case _ of
+    Left err -> do
+      log $ "ERROR: " <> message err
+      log $ show (stack err)
+    Right r -> log "Success"
+  ) $ do
+  b <- makeEmptyVar  
   list <- runTest do
     phantomTests
     pageTests

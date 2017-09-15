@@ -2,12 +2,23 @@
 
 var fs = require('fs');
 
+function PhantomPageError(message, stack) {
+  this.name = 'PhantomPageError';
+  this.message = message;
+  this.stack = stack || (new Error()).stack;
+}
+PhantomPageError.prototype = Object.create(Error.prototype);
+PhantomPageError.prototype.constructor = PhantomPageError;
+
 exports.open_ = function(filepath) {
   return function (filesettings) {
     return function (success, error) {
       try {
         var stream = fs.open(filepath, filesettings);
       } catch (e) {
+        // when filepath doesn't exist, e is a string
+        // not an error.  We'll turn it into an error;
+        if (!(e instanceof Error)) e = new PhantomPageError(e);
         error(e);
       }
       success(stream);

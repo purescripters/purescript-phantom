@@ -1,5 +1,9 @@
 'use strict';
 
+function alwaysCancel(cancelError, onCancelerError, onCancelerSuccess) {
+  onCancelerSuccess();
+}
+
 function PhantomPageError(message, stack) {
   this.name = 'PhantomPageError';
   this.message = message;
@@ -8,23 +12,56 @@ function PhantomPageError(message, stack) {
 PhantomPageError.prototype = Object.create(Error.prototype);
 PhantomPageError.prototype.constructor = PhantomPageError;
 
-exports.createPage_ = function(success, error) {
+var phantomGlobal = {
+  pageCounter : 0,
+  errors : {}
+};
+
+exports.createPage_ = function(error, success) {
   var webpage = require('webpage').create();
+  webpage.phantomUniqueId = phantomGlobal.pageCounter++;
   success(webpage);
+  return alwaysCancel;
 }
+
+// exports.silenceErrors_ = function(webpage) {
+//   phantomGlobal.errors[webpage.uniqueId] = phantomGlobal.errors[webpage.uniqueId] || [];
+
+//   return function(success, error) {
+//     webpage.onError = function(msg, trace) {
+//         phantomGlobal.errors[webpage.uniqueId].push({
+//           msg : msg,
+//           trace:trace
+//         });
+//     };
+//     success();
+//   }
+// }
+
+// exports.getSilencedErrors_ = function(webpage) {
+//   return function(success, error) {
+//     if (phantomGlobal.errors[webpage.uniqueId]) {
+//       success(phantomGlobal.errors[webpage.uniqueId]);
+//     } else {
+//       error(new PhantomPageError("Silenced errors were not collected for the page."));
+//     }
+//   }
+// }
 
 exports.open_ = function(page) {
   return function(url) {
-    return function(success, error) {
+    return function(onError, onSuccess) {
       page.open(url, function(status) {
         // http://phantomjs.org/api/webpage/method/open.html
         // 'success' or 'fail'
         if (status == "success") {
-          success(page);
+          onSuccess(page);
         } else {
-          error(new PhantomPageError("open '" + url + "' failed with phantom status '" + status + "'"));
+          onError(new PhantomPageError("open '" + url + "' failed with phantom status '" + status + "'"));
         }
       });
+
+      return alwaysCancel;
     }
   }
 }
@@ -33,15 +70,16 @@ exports.open_ = function(page) {
 exports.render_ = function(page) {
   return function(filename) {
     return function(settings) {
-      return function(success, error) {
+      return function(error, success) {
         try {
           // http://phantomjs.org/api/webpage/method/render.html
           var r = page.render(filename, settings);
-
           success(page);
         } catch (e) {
           error(new PhantomPageError("Could not render page to file '" + filename + "'. " + e.message, e.stack));
         }
+
+        return alwaysCancel;
       }
     }
   }
@@ -50,13 +88,14 @@ exports.render_ = function(page) {
 
 exports.injectJs_ = function(page) {
   return function(filename) {
-    return function(success, error) {
+    return function(error, success) {
       // http://phantomjs.org/api/webpage/method/inject-js.html
       if (page.injectJs(filename)) {
         success(page);
       } else {
         error(new PhantomPageError("'" + filename + "' could not be injected into page.  Maybe the filepath is misspelled or does not exist?"));
       }
+      return alwaysCancel;
     }
   }
 }
@@ -64,9 +103,10 @@ exports.injectJs_ = function(page) {
 
 exports.customHeaders_ = function(page) {
   return function(foreignObj) {
-    return function(success, error) {
+    return function(error, success) {
       page.customHeaders = foreignObj;
       success(page);
+      return alwaysCancel;
     }
   }
 }
@@ -74,7 +114,7 @@ exports.customHeaders_ = function(page) {
 
 exports.evaluate_ = function(page) {
   return function(fnName) {
-    return function(success, error) {
+    return function(error, success) {
 
       var r = page.evaluate(function(fnName) {
           try {
@@ -103,6 +143,8 @@ exports.evaluate_ = function(page) {
       } else {
         success(r);
       }
+      
+      return alwaysCancel;
     }
   }
 }
