@@ -1,6 +1,6 @@
 {
   "name": "purescript-phantom",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Purescript bindings to PhantomJS",
   "main": "index.js",
   "directories": {
