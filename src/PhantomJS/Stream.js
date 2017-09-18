@@ -65,6 +65,26 @@ exports.readLine_ = function(stream) {
   }
 }
 
+exports.read_ = function(stream) {
+  return function(just) {
+    return function (nothing) {
+      return function(error, success) {
+        try {
+          if (!stream.atEnd()) {
+            var line = just(stream.read());
+          } else {
+            var line = nothing;
+          }
+        } catch (e) {
+          error(e);
+        }
+        success(line);
+        return alwaysCancel;
+      }
+    }
+  }
+}
+
 exports.writeLine_ = function(stream) {
   return function(str) {
     return function(error, success) {

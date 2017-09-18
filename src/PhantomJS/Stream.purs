@@ -10,6 +10,7 @@ module PhantomJS.Stream
   , close
   , withSettings
   , seek
+  , read
   ) where
 
 import Control.Monad.Aff.Compat (EffFnAff(..), fromEffFnAff)
@@ -60,6 +61,8 @@ foreign import writeLine_ :: forall e.  Stream -> String -> EffFnAff (FSEff e) U
 
 foreign import readLine_ :: forall e a.  Stream -> (a -> Maybe a) -> (Maybe a) -> EffFnAff (FSEff e) (Maybe String)
 
+foreign import read_ :: forall e a.  Stream -> (a -> Maybe a) -> (Maybe a) -> EffFnAff (FSEff e) (Maybe String)
+
 foreign import close_ :: forall e. Stream -> EffFnAff (FSEff e) Unit
 
 foreign import seek_ :: forall e. Stream -> Int -> EffFnAff (FSEff e) Unit
@@ -79,6 +82,10 @@ writeLine s t = fromEffFnAff $ writeLine_ s t
 -- | Read a line from a file stream
 readLine :: forall e. Stream -> PhantomFSAff e (Maybe String)
 readLine stream = fromEffFnAff $ readLine_ stream Just Nothing
+
+-- | Read the entire stream
+read :: forall e. Stream -> PhantomFSAff e (Maybe String)
+read stream = fromEffFnAff $ read_ stream Just Nothing
 
 -- | Close a file stream
 close :: forall e. Stream -> PhantomFSAff e Unit
