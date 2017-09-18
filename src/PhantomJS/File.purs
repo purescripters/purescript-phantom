@@ -8,7 +8,6 @@
 
 module PhantomJS.File
   ( FileMode(..)
-  , Charset
   , FilePath
   , PHANTOMJSFS
   , PhantomFSAff
@@ -28,7 +27,6 @@ import Data.Generic.Rep (class Generic)
 import Data.Time.Duration (Milliseconds)
 import Prelude (class Eq, class Show, Unit, show, ($), (<<<))
 
-type Charset = String
 type FilePath = String
 type FileContent = String
 type FSEff e = (phantomjsfs :: PHANTOMJSFS | e)

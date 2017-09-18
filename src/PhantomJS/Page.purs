@@ -22,7 +22,7 @@ import Data.Generic.Rep.Show (genericShow)
 import Data.StrMap (StrMap, fromFoldable)
 import Data.Tuple (Tuple)
 import PhantomJS.Phantom (PHANTOMJS)
-import Prelude (class Eq, class Show, show, ($), (<<<))
+import Prelude (class Eq, class Show, Unit, show, ($), (<<<))
 
 type URL = String
 type FilePath = String
@@ -101,32 +101,32 @@ createPage :: forall e. PhantomAff e Page
 createPage = fromEffFnAff createPage_
 
 
-foreign import customHeaders_ :: forall e. Page -> StrMap String -> EffPhantomAff e Page
+foreign import customHeaders_ :: forall e. Page -> StrMap String -> EffPhantomAff e Unit
 
 -- | Sets custom headers on a page context.  These headers will persist
 -- | for the life of the context.
-customHeadersRaw :: forall e f. (Foldable f) => Page -> f (Tuple String String) -> PhantomAff e Page
+customHeadersRaw :: forall e f. (Foldable f) => Page -> f (Tuple String String) -> PhantomAff e Unit
 customHeadersRaw page headers = fromEffFnAff $ customHeaders_ page (fromFoldable headers)
 
 
-foreign import open_ :: forall e. Page -> URL -> EffPhantomAff e Page
+foreign import open_ :: forall e. Page -> URL -> EffPhantomAff e Unit
 
 -- | Opens a URL in a page context.
-open :: forall e. Page -> URL -> PhantomAff e Page
+open :: forall e. Page -> URL -> PhantomAff e Unit
 open p u = fromEffFnAff $ open_ p u
 
 
-foreign import render_ :: forall e. Page -> FilePath -> ForeignRenderSettings -> EffPhantomAff e Page
+foreign import render_ :: forall e. Page -> FilePath -> ForeignRenderSettings -> EffPhantomAff e Unit
 
 -- | Renders a screenshot of the given page.
-render :: forall e. Page -> FilePath -> RenderSettings ->  PhantomAff e Page
+render :: forall e. Page -> FilePath -> RenderSettings ->  PhantomAff e Unit
 render page fp rs = fromEffFnAff $ render_ page fp (toForeignRenderSettings rs)
 
 
-foreign import injectJs_ :: forall e. Page -> FilePath -> EffPhantomAff e Page
+foreign import injectJs_ :: forall e. Page -> FilePath -> EffPhantomAff e Unit
 
 -- | Injects a javascript file into a page.
-injectJs :: forall e. Page -> FilePath -> PhantomAff e Page
+injectJs :: forall e. Page -> FilePath -> PhantomAff e Unit
 injectJs page fp = fromEffFnAff $ injectJs_ page fp
 
 

@@ -17,6 +17,7 @@ import Test.PhantomJS.Phantom (phantomTests)
 import Test.PhantomJS.System (systemTests)
 import Test.Unit (collectResults, keepErrors)
 import Test.Unit.Output.Simple (runTest)
+import Test.PhantomJS.Stream (streamTests)
 
 main :: forall e.
         Eff
@@ -39,6 +40,7 @@ main = runAff_ (case _ of
     pageTests
     fileTests
     systemTests
+    streamTests
 
   results <- collectResults list
   let failed = keepErrors results
