@@ -17,7 +17,7 @@ module PhantomJS.Phantom
   , injectJs
   ) where
 
-import Prelude (class Eq, class Show, Unit, pure, show, map, (>>=), (<<<), (<>), (==), (&&))
+import Prelude
 import Control.Monad.Eff (Eff, kind Effect)
 
 foreign import data PHANTOMJS :: Effect

@@ -10,9 +10,9 @@ import Control.Monad.Eff.Exception (message, stack)
 import Data.Either (Either(..))
 import Data.Maybe (fromMaybe)
 import Data.Tuple (Tuple(..))
-import PhantomJS.Page (open, render, createPage, injectJs, evaluate, Page, customHeadersRaw, png)
+import PhantomJS.Page (createPage, customHeadersRaw, evaluate, injectJs, open, png, render)
 import PhantomJS.Phantom (PHANTOMJS, exit)
-import Prelude (Unit, bind, ($), (<>), pure, discard)
+import Prelude
 
 -- Some examples of using PhantomJS.Page module.
 -- Run the following in project root...

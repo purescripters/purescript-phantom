@@ -12,52 +12,22 @@ function PhantomPageError(message, stack) {
 PhantomPageError.prototype = Object.create(Error.prototype);
 PhantomPageError.prototype.constructor = PhantomPageError;
 
-var phantomGlobal = {
-  pageCounter : 0,
-  errors : {}
-};
-
 exports.createPage_ = function(error, success) {
   var webpage = require('webpage').create();
-  webpage.phantomUniqueId = phantomGlobal.pageCounter++;
   success(webpage);
   return alwaysCancel;
 }
 
-// exports.silenceErrors_ = function(webpage) {
-//   phantomGlobal.errors[webpage.uniqueId] = phantomGlobal.errors[webpage.uniqueId] || [];
-
-//   return function(success, error) {
-//     webpage.onError = function(msg, trace) {
-//         phantomGlobal.errors[webpage.uniqueId].push({
-//           msg : msg,
-//           trace:trace
-//         });
-//     };
-//     success();
-//   }
-// }
-
-// exports.getSilencedErrors_ = function(webpage) {
-//   return function(success, error) {
-//     if (phantomGlobal.errors[webpage.uniqueId]) {
-//       success(phantomGlobal.errors[webpage.uniqueId]);
-//     } else {
-//       error(new PhantomPageError("Silenced errors were not collected for the page."));
-//     }
-//   }
-// }
-
 exports.open_ = function(page) {
   return function(url) {
-    return function(onError, onSuccess) {
+    return function(error, success) {
       page.open(url, function(status) {
         // http://phantomjs.org/api/webpage/method/open.html
         // 'success' or 'fail'
         if (status == "success") {
-          onSuccess(page);
+          success(page);
         } else {
-          onError(new PhantomPageError("open '" + url + "' failed with phantom status '" + status + "'"));
+          error(new PhantomPageError("open '" + url + "' failed with phantom status '" + status + "'"));
         }
       });
 

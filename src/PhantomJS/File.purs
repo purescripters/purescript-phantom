@@ -20,12 +20,12 @@ module PhantomJS.File
   ) where
 
 import Control.Monad.Aff (Aff)
-import Control.Monad.Aff.Compat (EffFnAff(..), fromEffFnAff)
+import Control.Monad.Aff.Compat (EffFnAff, fromEffFnAff)
 import Control.Monad.Eff (kind Effect)
 import Data.Foreign (toForeign, Foreign)
 import Data.Generic.Rep (class Generic)
 import Data.Time.Duration (Milliseconds)
-import Prelude (class Eq, class Show, Unit, show, ($), (<<<))
+import Prelude
 
 type FilePath = String
 type FileContent = String

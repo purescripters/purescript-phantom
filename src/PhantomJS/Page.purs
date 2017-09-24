@@ -22,7 +22,7 @@ import Data.Generic.Rep.Show (genericShow)
 import Data.StrMap (StrMap, fromFoldable)
 import Data.Tuple (Tuple)
 import PhantomJS.Phantom (PHANTOMJS)
-import Prelude (class Eq, class Show, Unit, show, ($), (<<<))
+import Prelude
 
 type URL = String
 type FilePath = String

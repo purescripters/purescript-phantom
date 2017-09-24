@@ -13,14 +13,14 @@ module PhantomJS.Stream
   , read
   ) where
 
-import Control.Monad.Aff.Compat (EffFnAff(..), fromEffFnAff)
+import Control.Monad.Aff.Compat (EffFnAff, fromEffFnAff)
 import Data.Foreign (toForeign, Foreign)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
 import Data.TextEncoder (Encoding)
 import PhantomJS.File (FileMode, FilePath, PHANTOMJSFS, PhantomFSAff, toForeignFileMode)
-import Prelude (class Show, Unit, show, ($), (<<<), (<=<), (=<<))
+import Prelude
 
 type ForeignStreamSettings = Foreign
 type FSEff e = (phantomjsfs :: PHANTOMJSFS | e)

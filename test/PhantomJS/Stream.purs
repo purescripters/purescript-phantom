@@ -2,17 +2,17 @@ module Test.PhantomJS.Stream (
     streamTests
   ) where
 
+import Prelude
 import Data.Maybe (Maybe(..))
 import Data.TextEncoder (Encoding(..))
-import Debug.Trace (traceShowM)
 import PhantomJS.File (FileMode(..), PHANTOMJSFS, remove)
 import PhantomJS.Phantom (PHANTOMJS)
-import PhantomJS.Stream (StreamSettings, close, open, read, readLine, seek, withSettings, write, writeLine)
-import Prelude (bind, discard, void, ($), (&&), (==))
+import PhantomJS.Stream (StreamSettings, close, open, readLine, seek, withSettings, write, writeLine)
 import Test.PhantomJS.Paths (getTempFile)
 import Test.PhantomJS.Phantom (liftEff)
 import Test.Unit (describe, it, TestSuite)
 import Test.Unit.Assert (assert)
+-- import Debug.Trace (traceShowM)
 
 settings :: StreamSettings
 settings = withSettings A Utf8
