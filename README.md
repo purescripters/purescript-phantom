@@ -14,7 +14,7 @@ Purescript bindings to PhantomJS
 
 ## Motive
 
-Purescript code is pure and total, so most testing is usually a form of documentation or done with generative tests. However,
+PureScript code is pure and total, so most testing is usually a form of documentation or done with generative tests. However,
 occasionally tests need to test FFI bindings, which is where PhantomJS comes in handy. If you need to test some code that deals
 with `Window`, or the DOM, or some web APIs, these bindings come in handy. It can be used as a simpler replacement to the karma
 test-runner framework.
@@ -37,22 +37,8 @@ main = do
 
 Purescript | purescript-phantom | phantomjs
 -----------|--------------------|-----
-v0.11.0 | v2.x.x | 2.1.x
+v0.11.x | v2.x.x | 2.1.x
 v0.10.1 - v0.10.7| v1.x.x | 2.1.x
-
-## Tests
-
-Assuming you have purescript and phantomjs installed, run the following in the project root...
-
-`PHANTOM_TEST_PATH=$(pwd) pulp test --runtime phantomjs`
-
-Or if you're using [phantomjs-prebuilt](https://www.npmjs.com/package/phantomjs-prebuilt)...
-
-`PHANTOM_TEST_PATH=$(pwd) pulp test --runtime ./node_modules/.bin/phantomjs`
-
-You can also run the tests, in the [purescript-docker image](https://github.com/Risto-Stevcev/purescript-docker).
-If you're using docker, follow the instructions in the comments of `test.sh` to get a working container.  You can then run the
-tests inside of the container by running `./test.sh` on the host, which will run `pulp --watch test` inside the container.
 
 ## Examples
 
@@ -75,3 +61,17 @@ cd examples-output
 ../node_modules/.bin/phantomjs example.js
 ../node_modules/.bin/phantomjs stream.js
 ```
+
+## Tests
+
+Assuming you have purescript and phantomjs installed, run the following in the project root...
+
+`PHANTOM_TEST_PATH=$(pwd) pulp test --runtime phantomjs`
+
+Or if you're using [phantomjs-prebuilt](https://www.npmjs.com/package/phantomjs-prebuilt)...
+
+`PHANTOM_TEST_PATH=$(pwd) pulp test --runtime ./node_modules/.bin/phantomjs`
+
+You can also run the tests, in the [purescript-docker image](https://github.com/Risto-Stevcev/purescript-docker).
+If you're using docker, follow the instructions in the comments of `test.sh` to get a working container.  You can then run the
+tests inside of the container by running `./test.sh` on the host, which will run `pulp --watch test` inside the container.

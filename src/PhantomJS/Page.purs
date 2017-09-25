@@ -12,21 +12,24 @@ module PhantomJS.Page
   , evaluate
   ) where
 
-import Prelude (class Show, show, class Eq, (<<<))
 import Control.Monad.Aff (Aff)
-import Data.Tuple (Tuple)
-import Data.StrMap (StrMap, fromFoldable)
+import Control.Monad.Aff.Compat (EffFnAff, fromEffFnAff)
+import Control.Monad.Eff (kind Effect)
 import Data.Foldable (class Foldable)
-import PhantomJS.Phantom (PHANTOMJS)
 import Data.Foreign (toForeign, Foreign)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Control.Monad.Eff (kind Effect)
+import Data.StrMap (StrMap, fromFoldable)
+import Data.Tuple (Tuple)
+import PhantomJS.Phantom (PHANTOMJS)
+import Prelude
 
 type URL = String
 type FilePath = String
 type RenderQuality = Int
 type PhantomAff e a = Aff (phantomjs :: PHANTOMJS | e) a
+type EffPhantomAff e a = EffFnAff (phantomjs :: PHANTOMJS | e) a
+
 type ForeignRenderSettings = Foreign
 
 -- | The type of image format when rendering a screenshot
@@ -91,43 +94,43 @@ png
 -- | The type of a PhantomJS page context.
 foreign import data Page :: Type
 
-foreign import createPage_ :: forall e. PhantomAff e Page
+foreign import createPage_ :: forall e. EffPhantomAff e Page
 
 -- | Creates a new page context.
 createPage :: forall e. PhantomAff e Page
-createPage = createPage_
+createPage = fromEffFnAff createPage_
 
 
-foreign import customHeaders_ :: forall e. Page -> StrMap String -> PhantomAff e Page
+foreign import customHeaders_ :: forall e. Page -> StrMap String -> EffPhantomAff e Unit
 
 -- | Sets custom headers on a page context.  These headers will persist
 -- | for the life of the context.
-customHeadersRaw :: forall e f. (Foldable f) => Page -> f (Tuple String String) -> PhantomAff e Page
-customHeadersRaw page headers = customHeaders_ page (fromFoldable headers)
+customHeadersRaw :: forall e f. (Foldable f) => Page -> f (Tuple String String) -> PhantomAff e Unit
+customHeadersRaw page headers = fromEffFnAff $ customHeaders_ page (fromFoldable headers)
 
 
-foreign import open_ :: forall e. Page -> URL -> PhantomAff e Page
+foreign import open_ :: forall e. Page -> URL -> EffPhantomAff e Unit
 
 -- | Opens a URL in a page context.
-open :: forall e. Page -> URL -> PhantomAff e Page
-open = open_
+open :: forall e. Page -> URL -> PhantomAff e Unit
+open p u = fromEffFnAff $ open_ p u
 
 
-foreign import render_ :: forall e. Page -> FilePath -> ForeignRenderSettings -> PhantomAff e Page
+foreign import render_ :: forall e. Page -> FilePath -> ForeignRenderSettings -> EffPhantomAff e Unit
 
 -- | Renders a screenshot of the given page.
-render :: forall e. Page -> FilePath -> RenderSettings ->  PhantomAff e Page
-render page fp rs = render_ page fp (toForeignRenderSettings rs)
+render :: forall e. Page -> FilePath -> RenderSettings ->  PhantomAff e Unit
+render page fp rs = fromEffFnAff $ render_ page fp (toForeignRenderSettings rs)
 
 
-foreign import injectJs_ :: forall e. Page -> FilePath -> PhantomAff e Page
+foreign import injectJs_ :: forall e. Page -> FilePath -> EffPhantomAff e Unit
 
 -- | Injects a javascript file into a page.
-injectJs :: forall e. Page -> FilePath -> PhantomAff e Page
-injectJs = injectJs_
+injectJs :: forall e. Page -> FilePath -> PhantomAff e Unit
+injectJs page fp = fromEffFnAff $ injectJs_ page fp
 
 
-foreign import evaluate_ :: forall e a. Page -> String -> PhantomAff e a
+foreign import evaluate_ :: forall e a. Page -> String -> EffPhantomAff e a
 
 -- | Evaluates a specific function on the window object of the page.
 -- | When using this function you will need to add a type annotation so
@@ -135,4 +138,4 @@ foreign import evaluate_ :: forall e a. Page -> String -> PhantomAff e a
 -- |
 -- | `result <- evaluate page "file.js" :: forall e. Aff e (Array String)`
 evaluate :: forall e a. Page -> String -> PhantomAff e a
-evaluate = evaluate_
+evaluate page fp = fromEffFnAff $ evaluate_ page fp

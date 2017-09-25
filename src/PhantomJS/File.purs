@@ -8,7 +8,6 @@
 
 module PhantomJS.File
   ( FileMode(..)
-  , Charset
   , FilePath
   , PHANTOMJSFS
   , PhantomFSAff
@@ -20,17 +19,18 @@ module PhantomJS.File
   , toForeignFileMode
   ) where
 
-import Prelude (Unit, class Eq,class Show, show, (<<<))
 import Control.Monad.Aff (Aff)
+import Control.Monad.Aff.Compat (EffFnAff, fromEffFnAff)
+import Control.Monad.Eff (kind Effect)
 import Data.Foreign (toForeign, Foreign)
 import Data.Generic.Rep (class Generic)
 import Data.Time.Duration (Milliseconds)
-import Control.Monad.Eff (kind Effect)
+import Prelude
 
-type Charset = String
 type FilePath = String
 type FileContent = String
-type PhantomFSAff e a = Aff ( phantomjsfs :: PHANTOMJSFS | e ) a
+type FSEff e = (phantomjsfs :: PHANTOMJSFS | e)
+type PhantomFSAff e a = Aff (phantomjsfs :: PHANTOMJSFS | e) a
 type ForeignFileMode = Foreign
 
 -- http://phantomjs.org/api/fs/method/open.html
@@ -54,33 +54,33 @@ toForeignFileMode = toForeign <<< show
 
 foreign import data PHANTOMJSFS :: Effect
 
-foreign import exists_ :: forall e. FilePath -> PhantomFSAff e Boolean
+foreign import exists_ :: forall e. FilePath -> EffFnAff (FSEff e) Boolean
 
-foreign import remove_ :: forall e. FilePath -> PhantomFSAff e Unit
+foreign import remove_ :: forall e. FilePath -> EffFnAff (FSEff e) Unit
 
-foreign import write_ :: forall e. FilePath -> FileContent -> ForeignFileMode -> PhantomFSAff e Unit
+foreign import write_ :: forall e. FilePath -> FileContent -> ForeignFileMode -> EffFnAff (FSEff e) Unit
 
-foreign import read_ :: forall e. FilePath -> PhantomFSAff e String
+foreign import read_ :: forall e. FilePath -> EffFnAff (FSEff e) String
 
-foreign import lastModified_ :: forall e. FilePath -> PhantomFSAff e Milliseconds
+foreign import lastModified_ :: forall e. FilePath -> EffFnAff (FSEff e) Milliseconds
 
 -- Deletes a file
-remove :: forall e. FilePath -> PhantomFSAff e Unit
-remove = remove_
+remove :: forall e. FilePath -> Aff (FSEff e) Unit
+remove = fromEffFnAff <<< remove_
 
 -- Checks if a file exists
-exists :: forall e. FilePath -> PhantomFSAff e Boolean
-exists = exists_
+exists :: forall e. FilePath -> Aff (FSEff e) Boolean
+exists = fromEffFnAff <<< exists_
 
 -- Writes to a file
-write :: forall e. FilePath -> FileContent -> FileMode -> PhantomFSAff e Unit
-write fp c fm = write_ fp c (toForeignFileMode fm)
+write :: forall e. FilePath -> FileContent -> FileMode -> Aff (FSEff e) Unit
+write fp c fm = fromEffFnAff $ write_ fp c (toForeignFileMode fm)
 
 -- Reads from a file
-read :: forall e. FilePath -> PhantomFSAff e String
-read = read_
+read :: forall e. FilePath -> Aff (FSEff e) String
+read = fromEffFnAff <<< read_
 
 -- Returns the last modified date of a file in milliseconds.  If the file
 -- doesn't exist, an error is thrown.
-lastModified :: forall e. FilePath -> PhantomFSAff e Milliseconds
-lastModified fp = lastModified_ fp
+lastModified :: forall e. FilePath -> Aff (FSEff e) Milliseconds
+lastModified = fromEffFnAff <<< lastModified_

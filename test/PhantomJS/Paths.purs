@@ -8,13 +8,11 @@ module Test.PhantomJS.Paths
   , getTestInjectScriptPath
   ) where
 
-import Control.Bind ((>>=))
+import Prelude
 import Control.Monad.Eff (Eff)
 import Data.Maybe (fromMaybe)
-import Data.Monoid (append)
 import PhantomJS.Phantom (PHANTOMJS)
 import PhantomJS.System (getEnv)
-import Prelude ((<>), pure, flip, ($), (<$>), bind)
 
 -- If you're using the purescript-docker container the path will be /home/pureuser
 -- otherwise you can set PHANTOM_TEST_PATH on command line.

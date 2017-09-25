@@ -1,5 +1,9 @@
 'use strict';
 
+function alwaysCancel(cancelError, onCancelerError, onCancelerSuccess) {
+  onCancelerSuccess();
+}
+
 function PhantomPageError(message, stack) {
   this.name = 'PhantomPageError';
   this.message = message;
@@ -8,14 +12,15 @@ function PhantomPageError(message, stack) {
 PhantomPageError.prototype = Object.create(Error.prototype);
 PhantomPageError.prototype.constructor = PhantomPageError;
 
-exports.createPage_ = function(success, error) {
+exports.createPage_ = function(error, success) {
   var webpage = require('webpage').create();
   success(webpage);
+  return alwaysCancel;
 }
 
 exports.open_ = function(page) {
   return function(url) {
-    return function(success, error) {
+    return function(error, success) {
       page.open(url, function(status) {
         // http://phantomjs.org/api/webpage/method/open.html
         // 'success' or 'fail'
@@ -25,6 +30,8 @@ exports.open_ = function(page) {
           error(new PhantomPageError("open '" + url + "' failed with phantom status '" + status + "'"));
         }
       });
+
+      return alwaysCancel;
     }
   }
 }
@@ -33,15 +40,16 @@ exports.open_ = function(page) {
 exports.render_ = function(page) {
   return function(filename) {
     return function(settings) {
-      return function(success, error) {
+      return function(error, success) {
         try {
           // http://phantomjs.org/api/webpage/method/render.html
           var r = page.render(filename, settings);
-
           success(page);
         } catch (e) {
           error(new PhantomPageError("Could not render page to file '" + filename + "'. " + e.message, e.stack));
         }
+
+        return alwaysCancel;
       }
     }
   }
@@ -50,13 +58,14 @@ exports.render_ = function(page) {
 
 exports.injectJs_ = function(page) {
   return function(filename) {
-    return function(success, error) {
+    return function(error, success) {
       // http://phantomjs.org/api/webpage/method/inject-js.html
       if (page.injectJs(filename)) {
         success(page);
       } else {
         error(new PhantomPageError("'" + filename + "' could not be injected into page.  Maybe the filepath is misspelled or does not exist?"));
       }
+      return alwaysCancel;
     }
   }
 }
@@ -64,9 +73,10 @@ exports.injectJs_ = function(page) {
 
 exports.customHeaders_ = function(page) {
   return function(foreignObj) {
-    return function(success, error) {
+    return function(error, success) {
       page.customHeaders = foreignObj;
       success(page);
+      return alwaysCancel;
     }
   }
 }
@@ -74,7 +84,7 @@ exports.customHeaders_ = function(page) {
 
 exports.evaluate_ = function(page) {
   return function(fnName) {
-    return function(success, error) {
+    return function(error, success) {
 
       var r = page.evaluate(function(fnName) {
           try {
@@ -103,6 +113,8 @@ exports.evaluate_ = function(page) {
       } else {
         success(r);
       }
+      
+      return alwaysCancel;
     }
   }
 }
