@@ -4,6 +4,7 @@ Purescript bindings to PhantomJS
 
 ![PhantomJS logo](https://raw.githubusercontent.com/Risto-Stevcev/purescript-phantom/master/logo.png)
 
+[![Latest release](http://img.shields.io/github/release/purescripters/purescript-phantom.svg)](https://github.com/purescripters/purescript-phantom/releases)
 [![Build Status](https://travis-ci.org/purescripters/purescript-phantom.svg?branch=master)](https://travis-ci.org/purescripters/purescript-phantom)
 
 * [Motive](#motive)
