@@ -13,7 +13,7 @@ Purescript bindings to PhantomJS
 * [Tests](#tests)
 * [Examples](#examples)
 
-## Motive
+## Motivation
 
 PureScript code is pure and total, so most testing is usually a form of documentation or done with generative tests. However,
 occasionally tests need to test FFI bindings, which is where PhantomJS comes in handy. If you need to test some code that deals
