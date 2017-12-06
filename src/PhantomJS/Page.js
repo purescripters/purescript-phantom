@@ -118,3 +118,10 @@ exports.evaluate_ = function(page) {
     }
   }
 }
+
+// exports.onResourceRequested = function(page) {
+//   page.onResourceRequested = function(requestData, networkRequest) {
+//     console.log('Request (#' + requestData.id + '): ' + JSON.stringify(requestData));
+//   };
+// }
+
