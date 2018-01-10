@@ -16,7 +16,7 @@ exports.createPage_ = function(error, success) {
   var webpage = require('webpage').create();
   success(webpage);
   return alwaysCancel;
-}
+};
 
 exports.open_ = function(page) {
   return function(url) {
@@ -34,8 +34,7 @@ exports.open_ = function(page) {
       return alwaysCancel;
     }
   }
-}
-
+};
 
 exports.render_ = function(page) {
   return function(filename) {
@@ -53,8 +52,7 @@ exports.render_ = function(page) {
       }
     }
   }
-}
-
+};
 
 exports.injectJs_ = function(page) {
   return function(filename) {
@@ -68,7 +66,7 @@ exports.injectJs_ = function(page) {
       return alwaysCancel;
     }
   }
-}
+};
 
 
 exports.customHeaders_ = function(page) {
@@ -79,8 +77,7 @@ exports.customHeaders_ = function(page) {
       return alwaysCancel;
     }
   }
-}
-
+};
 
 exports.evaluate_ = function(page) {
   return function(fnName) {
@@ -105,7 +102,7 @@ exports.evaluate_ = function(page) {
           }
       }, fnName);
 
-      if (r.type && r.type == "purescript-phantom-error") {
+      if (r && r.type && r.type == "purescript-phantom-error") {
         // An exception was thrown in the page's context
         // so we'll create a custom Error object that
         // lets us set the message and stack
@@ -113,15 +110,67 @@ exports.evaluate_ = function(page) {
       } else {
         success(r);
       }
-      
+
       return alwaysCancel;
     }
   }
-}
+};
 
-// exports.onResourceRequested = function(page) {
-//   page.onResourceRequested = function(requestData, networkRequest) {
-//     console.log('Request (#' + requestData.id + '): ' + JSON.stringify(requestData));
-//   };
-// }
+exports.onResourceRequested_ = function(page) {
+  return function(error, success) {
 
+    page.onResourceRequested = function(request) {
+      success(request);
+    }
+
+    return alwaysCancel;
+
+  }
+};
+
+exports.onResourceRequestedFor_ = function(page) {
+  return function(time) {
+    var start = Date.now();
+    var end = start + time;
+    var requests = [];
+
+    return function(error, success) {
+
+      window.setTimeout(function() {
+        success(requests);
+      }, time);
+
+      page.onResourceRequested = function(request) {
+        if (Date.now() <= end) {
+          requests.push(request);
+        }
+      }
+
+      return alwaysCancel;
+
+    }
+  }
+};
+
+exports.silencePageErrors_ = function(page) {
+  return function(error, success) {
+    page.onError = function(msg, trace) {}
+    success();
+    return alwaysCancel;
+  }
+};
+
+exports.waitImpl = function(time) {
+  return function (error, success) {
+    setTimeout(function() {
+      success();
+    }, time);
+
+    function alwaysCancel(cancelError, onCancelerError, onCancelerSuccess) {
+      onCancelerSuccess();
+    }
+
+    return alwaysCancel;
+
+  }
+};

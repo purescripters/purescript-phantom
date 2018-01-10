@@ -1,6 +1,6 @@
 {
   "name": "purescript-phantom",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Purescript bindings to PhantomJS",
   "main": "index.js",
   "directories": {
@@ -17,7 +17,10 @@
     "purescript",
     "phantomjs"
   ],
-  "author": "Risto Stevcev",
+  "contributors": [
+    "Risto Stevcev",
+    "Dominick Gendill"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/purescripters/purescript-phantom/issues"

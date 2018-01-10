@@ -10,7 +10,14 @@ module PhantomJS.Page
   , render
   , injectJs
   , evaluate
+  , onResourceRequested
+  , onResourceRequestedFor
+  , silencePageErrors
+  , PhantomRequest(..)
+  , wait
   ) where
+
+import Prelude
 
 import Control.Monad.Aff (Aff)
 import Control.Monad.Aff.Compat (EffFnAff, fromEffFnAff)
@@ -19,10 +26,10 @@ import Data.Foldable (class Foldable)
 import Data.Foreign (toForeign, Foreign)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
+import Data.Nullable (Nullable)
 import Data.StrMap (StrMap, fromFoldable)
 import Data.Tuple (Tuple)
 import PhantomJS.Phantom (PHANTOMJS)
-import Prelude
 
 type URL = String
 type FilePath = String
@@ -64,9 +71,21 @@ newtype RenderSettings
 
 derive instance genericRenderSettings :: Generic RenderSettings _
 derive instance eqRenderSettings :: Eq RenderSettings
-
 instance showRenderSettings :: Show RenderSettings where
   show = genericShow
+
+
+newtype PhantomRequest
+  = PhantomRequest
+  { url :: String
+  , method :: String
+  , postData :: Nullable String }
+
+derive instance genericPhantomRequest :: Generic PhantomRequest _
+derive instance eqPhantomRequest :: Eq PhantomRequest
+instance showPhantomRequest :: Show PhantomRequest where
+  show = genericShow
+
 
 -- | Used to convert RenderSettings to a foreign type
 -- | that can be passed into native phantomjs functions.
@@ -139,3 +158,39 @@ foreign import evaluate_ :: forall e a. Page -> String -> EffPhantomAff e a
 -- | `result <- evaluate page "file.js" :: forall e. Aff e (Array String)`
 evaluate :: forall e a. Page -> String -> PhantomAff e a
 evaluate page fp = fromEffFnAff $ evaluate_ page fp
+
+
+foreign import onResourceRequested_ :: forall e a. Page -> EffPhantomAff e PhantomRequest
+
+-- | Intercept a single network request for a page
+onResourceRequested :: forall e a. Page -> PhantomAff e PhantomRequest
+onResourceRequested page = fromEffFnAff $ onResourceRequested_ page
+
+
+foreign import onResourceRequestedFor_ :: forall e a. Page -> Int -> EffPhantomAff e (Array PhantomRequest)
+
+-- | Intercept a page's network requests for a certain number of milliseconds
+-- |
+-- | `
+-- | synchronousRequests <- onResourceRequestedFor page 10000
+-- | requestsFiber <- forkAff $ onResourceRequestedFor page 800
+-- | -- Do some more synchronous stuff...
+-- | request <- try (joinFiber requestsFiber)
+-- | `
+onResourceRequestedFor :: forall e a. Page -> Int -> PhantomAff e (Array PhantomRequest)
+onResourceRequestedFor page time =  fromEffFnAff $ onResourceRequestedFor_ page time
+
+
+foreign import silencePageErrors_ :: forall e a. Page -> EffPhantomAff e Unit
+
+-- | Disregard all errors that get thrown in a page's
+-- | web context.
+silencePageErrors :: forall e a. Page -> PhantomAff e Unit
+silencePageErrors page =  fromEffFnAff $ silencePageErrors_ page
+
+
+foreign import waitImpl :: forall e. Int -> EffPhantomAff e Unit
+
+-- | Function to wait a certain number of milliseconds
+wait :: forall e. Int -> PhantomAff e Unit
+wait time = fromEffFnAff $ waitImpl time

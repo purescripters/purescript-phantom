@@ -1,7 +1,10 @@
 {
   "name": "purescript-phantom",
   "description": "Purescript bindings to PhantomJS",
-  "author": "Risto Stevcev",
+  "authors": [
+    "Risto Stevcev",
+    "Dominick Gendill"
+  ],
   "license": "MIT",
   "ignore": [
     "**/.*",
@@ -25,11 +28,12 @@
     "purescript-generics-rep": "^5.3.0",
     "purescript-datetime": "^3.3.0",
     "purescript-encoding": "^0.0.4",
-    "purescript-js-date": "^5.1.0"
+    "purescript-js-date": "^5.1.0",
+    "purescript-nullable": "^3.0.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^3.0.0",
     "purescript-test-unit": "^13.0.0",
-    "purescript-debug": "^3.0.0"
+    "purescript-debug": "^3.0.0"    
   }
 }
