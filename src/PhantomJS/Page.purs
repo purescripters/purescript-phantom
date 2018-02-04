@@ -1,6 +1,8 @@
 module PhantomJS.Page
   ( RenderFormat(..)
   , RenderSettings
+  , PageError
+  , StackInfo
   , jpeg
   , png
   , Page
@@ -13,19 +15,23 @@ module PhantomJS.Page
   , onResourceRequested
   , onResourceRequestedFor
   , silencePageErrors
+  , getSilencedErrors
+  , clearPageErrors
   , PhantomRequest(..)
   , wait
   ) where
 
 import Prelude
 
-import Control.Monad.Aff (Aff)
+import Control.Monad.Aff (Aff, Fiber, forkAff)
 import Control.Monad.Aff.Compat (EffFnAff, fromEffFnAff)
 import Control.Monad.Eff (kind Effect)
 import Data.Foldable (class Foldable)
 import Data.Foreign (toForeign, Foreign)
+import Data.Function.Uncurried (Fn3, runFn3)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
+import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
 import Data.StrMap (StrMap, fromFoldable)
 import Data.Tuple (Tuple)
@@ -36,6 +42,30 @@ type FilePath = String
 type RenderQuality = Int
 type PhantomAff e a = Aff (phantomjs :: PHANTOMJS | e) a
 type EffPhantomAff e a = EffFnAff (phantomjs :: PHANTOMJS | e) a
+
+-- | Holds information related to a stack trace
+newtype StackInfo = StackInfo {
+  line :: Int,
+  file :: String,
+  function :: Maybe String
+}
+
+derive instance genericStackInfo :: Generic StackInfo _
+derive instance eqStackInfo :: Eq StackInfo
+instance showStackInfo :: Show StackInfo where
+  show = genericShow
+
+
+-- | The type for errors on a page
+newtype PageError = PageError {
+  message :: String,
+  trace :: Array StackInfo
+}
+
+derive instance genericPageError :: Generic PageError _
+derive instance eqPageError :: Eq PageError
+instance showPageError :: Show PageError where
+  show = genericShow
 
 type ForeignRenderSettings = Foreign
 
@@ -75,6 +105,7 @@ instance showRenderSettings :: Show RenderSettings where
   show = genericShow
 
 
+-- | Represents an HTTP network request
 newtype PhantomRequest
   = PhantomRequest
   { url :: String
@@ -183,10 +214,24 @@ onResourceRequestedFor page time =  fromEffFnAff $ onResourceRequestedFor_ page 
 
 foreign import silencePageErrors_ :: forall e a. Page -> EffPhantomAff e Unit
 
--- | Disregard all errors that get thrown in a page's
--- | web context.
-silencePageErrors :: forall e a. Page -> PhantomAff e Unit
-silencePageErrors page =  fromEffFnAff $ silencePageErrors_ page
+-- | Prevent the default console error logging, and store errors for later retrieval.
+-- | Return a fiber which can be killed to stop the silence and restore the default
+-- | functionality.
+silencePageErrors :: forall e a. Page -> PhantomAff e (Fiber (phantomjs :: PHANTOMJS | e) Unit)
+silencePageErrors page = forkAff $ fromEffFnAff $ silencePageErrors_ page
+
+foreign import clearPageErrors_ :: forall e a. Page -> EffPhantomAff e Unit
+
+-- | Clear a page's stored errors
+clearPageErrors :: forall e. Page -> PhantomAff e Unit
+clearPageErrors page = fromEffFnAff $ clearPageErrors_ page
+
+
+foreign import getSilencedErrors_ :: forall e a. Fn3 Page (a -> Maybe a) (Maybe a) (EffPhantomAff e (Array PageError))
+
+-- | Get page errors that have been stored after running silencePageErrors
+getSilencedErrors :: forall e. Page -> PhantomAff e (Array PageError)
+getSilencedErrors page = fromEffFnAff $ runFn3 getSilencedErrors_ page Just Nothing
 
 
 foreign import waitImpl :: forall e. Int -> EffPhantomAff e Unit

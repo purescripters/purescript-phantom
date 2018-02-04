@@ -4,6 +4,25 @@ function alwaysCancel(cancelError, onCancelerError, onCancelerSuccess) {
   onCancelerSuccess();
 }
 
+function defaultErrorHandler(msg, trace) {
+
+  var msgStack = [msg];
+
+  if (trace && trace.length) {
+    trace.forEach(function(t) {
+      msgStack.push(' at ' + (t.function ? t.function + ' ' : '') + '(' + t.file + ':' + t.line + ')');
+    });
+  }
+  console.error(msgStack.join('\n'));
+
+}
+
+var phantomPageGlobal = {
+  pageCounter : 0,
+  errors : {}
+};
+
+
 function PhantomPageError(message, stack) {
   this.name = 'PhantomPageError';
   this.message = message;
@@ -14,6 +33,8 @@ PhantomPageError.prototype.constructor = PhantomPageError;
 
 exports.createPage_ = function(error, success) {
   var webpage = require('webpage').create();
+  webpage.phantomUniqueId = phantomPageGlobal.pageCounter++;
+  webpage.onError = defaultErrorHandler;
   success(webpage);
   return alwaysCancel;
 };
@@ -153,12 +174,65 @@ exports.onResourceRequestedFor_ = function(page) {
 };
 
 exports.silencePageErrors_ = function(page) {
+
+  phantomPageGlobal.errors[page.phantomUniqueId] = phantomPageGlobal.errors[page.phantomUniqueId] || []; 
+
   return function(error, success) {
-    page.onError = function(msg, trace) {}
-    success();
+    // http://phantomjs.org/api/webpage/handler/on-error.html
+    page.onError = function(msg, trace) {
+      phantomPageGlobal.errors[page.phantomUniqueId].push({
+        message : msg,
+        trace : trace
+      });
+    };
+
+    // success();
+
+    return function cancelSilencePageErrors_(cancelError, onCancelerError, onCancelerSuccess) {
+      page.onError = defaultErrorHandler;
+      onCancelerSuccess();
+    }
+
+  }
+};
+
+exports.getSilencedErrors_ = function(page, just, nothing) {
+  return function(error, success) {
+    if (phantomPageGlobal.errors[page.phantomUniqueId]) {
+      var errors = phantomPageGlobal.errors[page.phantomUniqueId].map(function(e) {
+        return {
+          message : e.message,
+          trace : e.trace.map(function(t) {
+            return {
+              file : t.file,
+              line : t.line,
+              function : t.function ? just(t.function) : nothing,
+            }
+          })
+        }
+      });
+      success(errors);
+    } else {
+      success([]);
+    }
+
     return alwaysCancel;
   }
 };
+
+exports.clearPageErrors_ = function(page) {
+  return function(error, success) {
+    if (phantomPageGlobal.errors[page.phantomUniqueId]) {
+      phantomPageGlobal.errors[page.phantomUniqueId] = [];
+      success();
+    } else {
+      success();
+    }
+
+    return alwaysCancel;
+  }
+};
+
 
 exports.waitImpl = function(time) {
   return function (error, success) {
