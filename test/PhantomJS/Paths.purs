@@ -5,6 +5,7 @@ module Test.PhantomJS.Paths
   , getTempFolder
   , getTempFile
   , getTestHtmlFile
+  , getTestHtmlFileWithErrors
   , getTestInjectScriptPath
   ) where
 
@@ -42,6 +43,11 @@ getTestHtmlFile :: forall e. Eff (phantomjs :: PHANTOMJS | e) String
 getTestHtmlFile = do
   p <- getProjectRoot
   pure $ p <> "test/assets/test.html"
+
+getTestHtmlFileWithErrors :: forall e. Eff (phantomjs :: PHANTOMJS | e) String
+getTestHtmlFileWithErrors = do
+  p <- getProjectRoot
+  pure $ p <> "test/assets/test-with-errors.html"
 
 getTempFolder :: forall e. Eff (phantomjs :: PHANTOMJS | e) String
 getTempFolder = do

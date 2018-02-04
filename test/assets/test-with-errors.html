@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Test Page</title>
+    <style type="text/css">
+      body { background: white; color: #000; }
+    </style>
+    
+    <script>
+      throw new Error('throw an error');
+    </script>
+
+    <script>
+      function b() { a(); }
+      function a() {
+        var l = window.locatin.thiswillthrowanerror;
+      }
+      b();    
+    </script>
+
+    <script>
+      window.setTimeout(function() {
+        throw new Error('OK - This error should be shown in the console for testing purposes.');
+      }, 1000);
+    </script>
+
+
+  </head>
+  <body>
+    <h1>Test Page</h1>
+
+    <p>This page is used for testing Page.purs. It purposely has console errors.</p>
+  </body>
+</html>

@@ -4,6 +4,25 @@ function alwaysCancel(cancelError, onCancelerError, onCancelerSuccess) {
   onCancelerSuccess();
 }
 
+function defaultErrorHandler(msg, trace) {
+
+  var msgStack = [msg];
+
+  if (trace && trace.length) {
+    trace.forEach(function(t) {
+      msgStack.push(' at ' + (t.function ? t.function + ' ' : '') + '(' + t.file + ':' + t.line + ')');
+    });
+  }
+  console.error(msgStack.join('\n'));
+
+}
+
+var phantomPageGlobal = {
+  pageCounter : 0,
+  errors : {}
+};
+
+
 function PhantomPageError(message, stack) {
   this.name = 'PhantomPageError';
   this.message = message;
@@ -14,9 +33,11 @@ PhantomPageError.prototype.constructor = PhantomPageError;
 
 exports.createPage_ = function(error, success) {
   var webpage = require('webpage').create();
+  webpage.phantomUniqueId = phantomPageGlobal.pageCounter++;
+  webpage.onError = defaultErrorHandler;
   success(webpage);
   return alwaysCancel;
-}
+};
 
 exports.open_ = function(page) {
   return function(url) {
@@ -34,8 +55,7 @@ exports.open_ = function(page) {
       return alwaysCancel;
     }
   }
-}
-
+};
 
 exports.render_ = function(page) {
   return function(filename) {
@@ -53,8 +73,7 @@ exports.render_ = function(page) {
       }
     }
   }
-}
-
+};
 
 exports.injectJs_ = function(page) {
   return function(filename) {
@@ -68,7 +87,7 @@ exports.injectJs_ = function(page) {
       return alwaysCancel;
     }
   }
-}
+};
 
 
 exports.customHeaders_ = function(page) {
@@ -79,8 +98,7 @@ exports.customHeaders_ = function(page) {
       return alwaysCancel;
     }
   }
-}
-
+};
 
 exports.evaluate_ = function(page) {
   return function(fnName) {
@@ -105,7 +123,7 @@ exports.evaluate_ = function(page) {
           }
       }, fnName);
 
-      if (r.type && r.type == "purescript-phantom-error") {
+      if (r && r.type && r.type == "purescript-phantom-error") {
         // An exception was thrown in the page's context
         // so we'll create a custom Error object that
         // lets us set the message and stack
@@ -113,8 +131,120 @@ exports.evaluate_ = function(page) {
       } else {
         success(r);
       }
-      
+
       return alwaysCancel;
     }
   }
-}
+};
+
+exports.onResourceRequested_ = function(page) {
+  return function(error, success) {
+
+    page.onResourceRequested = function(request) {
+      success(request);
+    }
+
+    return alwaysCancel;
+
+  }
+};
+
+exports.onResourceRequestedFor_ = function(page) {
+  return function(time) {
+    var start = Date.now();
+    var end = start + time;
+    var requests = [];
+
+    return function(error, success) {
+
+      window.setTimeout(function() {
+        success(requests);
+      }, time);
+
+      page.onResourceRequested = function(request) {
+        if (Date.now() <= end) {
+          requests.push(request);
+        }
+      }
+
+      return alwaysCancel;
+
+    }
+  }
+};
+
+exports.silencePageErrors_ = function(page) {
+
+  phantomPageGlobal.errors[page.phantomUniqueId] = phantomPageGlobal.errors[page.phantomUniqueId] || []; 
+
+  return function(error, success) {
+    // http://phantomjs.org/api/webpage/handler/on-error.html
+    page.onError = function(msg, trace) {
+      phantomPageGlobal.errors[page.phantomUniqueId].push({
+        message : msg,
+        trace : trace
+      });
+    };
+
+    // success();
+
+    return function cancelSilencePageErrors_(cancelError, onCancelerError, onCancelerSuccess) {
+      page.onError = defaultErrorHandler;
+      onCancelerSuccess();
+    }
+
+  }
+};
+
+exports.getSilencedErrors_ = function(page, just, nothing) {
+  return function(error, success) {
+    if (phantomPageGlobal.errors[page.phantomUniqueId]) {
+      var errors = phantomPageGlobal.errors[page.phantomUniqueId].map(function(e) {
+        return {
+          message : e.message,
+          trace : e.trace.map(function(t) {
+            return {
+              file : t.file,
+              line : t.line,
+              function : t.function ? just(t.function) : nothing,
+            }
+          })
+        }
+      });
+      success(errors);
+    } else {
+      success([]);
+    }
+
+    return alwaysCancel;
+  }
+};
+
+exports.clearPageErrors_ = function(page) {
+  return function(error, success) {
+    if (phantomPageGlobal.errors[page.phantomUniqueId]) {
+      phantomPageGlobal.errors[page.phantomUniqueId] = [];
+      success();
+    } else {
+      success();
+    }
+
+    return alwaysCancel;
+  }
+};
+
+
+exports.waitImpl = function(time) {
+  return function (error, success) {
+    setTimeout(function() {
+      success();
+    }, time);
+
+    function alwaysCancel(cancelError, onCancelerError, onCancelerSuccess) {
+      onCancelerSuccess();
+    }
+
+    return alwaysCancel;
+
+  }
+};

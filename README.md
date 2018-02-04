@@ -63,7 +63,7 @@ cd examples-output
 ../node_modules/.bin/phantomjs stream.js
 ```
 
-## Tests
+## Testing
 
 Assuming you have purescript and phantomjs installed, run the following in the project root...
 
@@ -76,3 +76,7 @@ Or if you're using [phantomjs-prebuilt](https://www.npmjs.com/package/phantomjs-
 You can also run the tests, in the [purescript-docker image](https://github.com/Risto-Stevcev/purescript-docker).
 If you're using docker, follow the instructions in the comments of `test.sh` to get a working container.  You can then run the
 tests inside of the container by running `./test.sh` on the host, which will run `pulp --watch test` inside the container.
+
+If you'd like to [test using console logging](https://medium.com/@mattdenner/purescript-3-914c51afe194) you can use [spy]
+(https://pursuit.purescript.org/packages/purescript-debug/3.0.0/docs/Debug.Trace#v:spy) or `traceAnyM` from [purescript-debug]
+(https://pursuit.purescript.org/packages/purescript-debug).
