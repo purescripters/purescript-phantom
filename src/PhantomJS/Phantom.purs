@@ -1,6 +1,5 @@
 module PhantomJS.Phantom
-  ( PHANTOMJS
-  , Cookie(..)
+  ( Cookie(..)
   , CookieRec
   , Version(..)
   , VersionRec
@@ -18,9 +17,7 @@ module PhantomJS.Phantom
   ) where
 
 import Prelude
-import Control.Monad.Eff (Eff, kind Effect)
-
-foreign import data PHANTOMJS :: Effect
+import Effect (Effect)
 
 type CookieRec =
   { domain   :: String
@@ -73,38 +70,30 @@ instance showVersion :: Show Version where
     ", patch: " <> show x.patch <> " " <>
     "}"
 
-foreign import isCookiesEnabled :: forall eff. Eff (phantomjs :: PHANTOMJS | eff) Boolean
+foreign import isCookiesEnabled :: Effect Boolean
 
-foreign import setCookiesEnabled :: Boolean -> forall eff. Eff (phantomjs :: PHANTOMJS | eff) Unit
+foreign import setCookiesEnabled :: Boolean -> Effect Unit
 
-
-cookies :: forall eff. Eff (phantomjs :: PHANTOMJS | eff) (Array Cookie)
+cookies :: Effect (Array Cookie)
 cookies = _cookies >>= pure <<< map Cookie
+foreign import _cookies :: Effect (Array CookieRec)
 
-foreign import _cookies :: forall eff. Eff (phantomjs :: PHANTOMJS | eff) (Array CookieRec)
+foreign import getLibraryPath :: Effect String
 
+foreign import setLibraryPath :: String -> Effect Unit
 
-foreign import getLibraryPath :: forall eff. Eff (phantomjs :: PHANTOMJS | eff) String
-
-foreign import setLibraryPath :: String -> forall eff. Eff (phantomjs :: PHANTOMJS | eff) Unit
-
-
-version :: forall eff. Eff (phantomjs :: PHANTOMJS | eff) Version
+version :: Effect Version
 version = _version >>= pure <<< Version
+foreign import _version :: Effect VersionRec
 
-foreign import _version :: forall eff. Eff (phantomjs :: PHANTOMJS | eff) VersionRec
-
-
-addCookie :: Cookie -> forall eff. Eff (phantomjs :: PHANTOMJS | eff) Boolean
+addCookie :: Cookie -> Effect Boolean
 addCookie (Cookie cookie) = _addCookie cookie
+foreign import _addCookie :: CookieRec -> Effect Boolean
 
-foreign import _addCookie :: CookieRec -> forall eff. Eff (phantomjs :: PHANTOMJS | eff) Boolean
+foreign import clearCookies :: Effect Unit
 
+foreign import deleteCookie :: String -> Effect Boolean
 
-foreign import clearCookies :: forall eff. Eff (phantomjs :: PHANTOMJS | eff) Unit
+foreign import exit :: Int -> Effect Unit
 
-foreign import deleteCookie :: String -> forall eff. Eff (phantomjs :: PHANTOMJS | eff) Boolean
-
-foreign import exit :: Int -> forall eff. Eff (phantomjs :: PHANTOMJS | eff) Unit
-
-foreign import injectJs :: String -> forall eff. Eff (phantomjs :: PHANTOMJS | eff) Boolean
+foreign import injectJs :: String -> Effect Boolean

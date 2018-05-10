@@ -13,17 +13,16 @@ module PhantomJS.Stream
   , read
   ) where
 
-import Control.Monad.Aff.Compat (EffFnAff, fromEffFnAff)
-import Data.Foreign (toForeign, Foreign)
+import Prelude
+
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
 import Data.TextEncoder (Encoding)
-import PhantomJS.File (FileMode, FilePath, PHANTOMJSFS, PhantomFSAff, toForeignFileMode)
-import Prelude
-
-type ForeignStreamSettings = Foreign
-type FSEff e = (phantomjsfs :: PHANTOMJSFS | e)
+import Effect.Aff (Aff)
+import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
+import Foreign (toForeign, Foreign)
+import PhantomJS.File (FileMode, FilePath, toForeignFileMode)
 
 -- http://stackoverflow.com/questions/8509339/what-is-the-most-common-encoding-of-each-language
 -- http://www.iana.org/assignments/character-sets/character-sets.xhtml
@@ -38,58 +37,47 @@ instance showStreamSettings :: Show StreamSettings where
   show = genericShow
 
 toForeignStreamSettings :: StreamSettings -> Foreign
-toForeignStreamSettings (StreamSettings { mode : filemode, charset : charset }) =
-    toForeign
-      { mode : (toForeignFileMode filemode)
-      , charset : (show charset) }
+toForeignStreamSettings (StreamSettings { mode, charset }) = toForeign
+  { mode : toForeignFileMode mode
+  , charset : show charset
+  }
 
 -- | Helper for creating a StreamSettings type
 withSettings :: FileMode -> Encoding -> StreamSettings
-withSettings fm charset =
-  StreamSettings
-  { mode : fm
-  , charset : charset
-  }
+withSettings mode charset = StreamSettings { mode, charset }
 
 foreign import data Stream :: Type
 
-foreign import open_ :: forall e. FilePath -> ForeignStreamSettings -> EffFnAff (FSEff e) Stream
-
-foreign import write_ :: forall e.  Stream -> String -> EffFnAff (FSEff e) Unit
-
-foreign import writeLine_ :: forall e.  Stream -> String -> EffFnAff (FSEff e) Unit
-
-foreign import readLine_ :: forall e a.  Stream -> (a -> Maybe a) -> (Maybe a) -> EffFnAff (FSEff e) (Maybe String)
-
-foreign import read_ :: forall e a.  Stream -> (a -> Maybe a) -> (Maybe a) -> EffFnAff (FSEff e) (Maybe String)
-
-foreign import close_ :: forall e. Stream -> EffFnAff (FSEff e) Unit
-
-foreign import seek_ :: forall e. Stream -> Int -> EffFnAff (FSEff e) Unit
-
 -- | Open a file stream
-open :: forall e. FilePath -> StreamSettings -> PhantomFSAff e Stream
-open fp fs = fromEffFnAff $ open_ fp (toForeignStreamSettings fs)
+open :: FilePath -> StreamSettings -> Aff Stream
+open fp fs = fromEffectFnAff $ open_ fp (toForeignStreamSettings fs)
+foreign import open_ :: FilePath -> Foreign -> EffectFnAff Stream
 
 -- | Write to a file stream
-write :: forall e. Stream -> String -> PhantomFSAff e Unit
-write s t = fromEffFnAff $ write_ s t
+write :: Stream -> String -> Aff Unit
+write s t = fromEffectFnAff $ write_ s t
+foreign import write_ :: Stream -> String -> EffectFnAff Unit
 
 -- | Write a line to a file stream
-writeLine :: forall e. Stream -> String -> PhantomFSAff e Unit
-writeLine s t = fromEffFnAff $ writeLine_ s t 
+writeLine :: Stream -> String -> Aff Unit
+writeLine s t = fromEffectFnAff $ writeLine_ s t
+foreign import writeLine_ :: Stream -> String -> EffectFnAff Unit
 
 -- | Read a line from a file stream
-readLine :: forall e. Stream -> PhantomFSAff e (Maybe String)
-readLine stream = fromEffFnAff $ readLine_ stream Just Nothing
+readLine :: Stream -> Aff (Maybe String)
+readLine stream = fromEffectFnAff $ readLine_ stream Just Nothing
+foreign import readLine_ :: forall a.  Stream -> (a -> Maybe a) -> (Maybe a) -> EffectFnAff (Maybe String)
 
 -- | Read the entire stream
-read :: forall e. Stream -> PhantomFSAff e (Maybe String)
-read stream = fromEffFnAff $ read_ stream Just Nothing
+read :: Stream -> Aff (Maybe String)
+read stream = fromEffectFnAff $ read_ stream Just Nothing
+foreign import read_ :: forall a.  Stream -> (a -> Maybe a) -> (Maybe a) -> EffectFnAff (Maybe String)
 
 -- | Close a file stream
-close :: forall e. Stream -> PhantomFSAff e Unit
-close = fromEffFnAff <<< close_
+close :: Stream -> Aff Unit
+close = fromEffectFnAff <<< close_
+foreign import close_ :: Stream -> EffectFnAff Unit
 
-seek :: forall e. Stream -> Int -> PhantomFSAff e Unit
-seek s position = fromEffFnAff $ seek_ s position
+seek :: Stream -> Int -> Aff Unit
+seek s position = fromEffectFnAff $ seek_ s position
+foreign import seek_ :: Stream -> Int -> EffectFnAff Unit

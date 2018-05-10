@@ -2,18 +2,15 @@ module Test.Main where
 
 import Prelude
 
-import Control.Monad.Aff (Error, runAff_)
-import Control.Monad.Aff.AVar (AVAR)
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (CONSOLE, log)
-import Control.Monad.Eff.Exception (stack)
 import Data.Either (either)
 import Data.List (length)
-import Data.Maybe (maybe)
-import Data.Monoid (mempty)
-import PhantomJS.File (PHANTOMJSFS)
-import PhantomJS.Phantom (PHANTOMJS, exit)
+import Data.Foldable (fold)
+import Effect (Effect)
+import Effect.Aff (runAff_)
+import Effect.Class (liftEffect)
+import Effect.Console (log)
+import Effect.Exception (stack)
+import PhantomJS.Phantom (exit)
 import Test.PhantomJS.File (fileTests)
 import Test.PhantomJS.Page (pageTests)
 import Test.PhantomJS.Phantom (phantomTests)
@@ -22,19 +19,8 @@ import Test.PhantomJS.System (systemTests)
 import Test.Unit (collectResults, keepErrors)
 import Test.Unit.Output.Simple (runTest)
 
-stack' :: Error -> String
-stack' = maybe mempty id <<< stack
-
-main :: forall e.
-        Eff
-          ( console :: CONSOLE
-          , avar :: AVAR
-          , phantomjs :: PHANTOMJS
-          , phantomjsfs :: PHANTOMJSFS
-          | e
-          )
-          Unit
-main = runAff_ (either (log <<< stack') (\_ -> log "Success")) do
+main :: Effect Unit
+main = runAff_ (either logError logSuccess) do
   list <- runTest do
     phantomTests
     pageTests
@@ -45,6 +31,9 @@ main = runAff_ (either (log <<< stack') (\_ -> log "Success")) do
   results <- collectResults list
   let failed = keepErrors results
 
-  if length failed > 0
-    then liftEff $ exit 1
-    else liftEff $ exit 0
+  liftEffect $ if length failed > 0
+    then exit 1
+    else exit 0
+  where
+  logError = liftEffect <<< log <<< fold <<< stack
+  logSuccess _ = liftEffect $ log "Success"
