@@ -21,7 +21,7 @@ import Data.Maybe (Maybe(..))
 import Data.TextEncoder (Encoding)
 import Effect.Aff (Aff)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
-import Foreign (toForeign, Foreign)
+import Foreign (unsafeToForeign, Foreign)
 import PhantomJS.File (FileMode, FilePath, toForeignFileMode)
 
 -- http://stackoverflow.com/questions/8509339/what-is-the-most-common-encoding-of-each-language
@@ -37,7 +37,7 @@ instance showStreamSettings :: Show StreamSettings where
   show = genericShow
 
 toForeignStreamSettings :: StreamSettings -> Foreign
-toForeignStreamSettings (StreamSettings { mode, charset }) = toForeign
+toForeignStreamSettings (StreamSettings { mode, charset }) = unsafeToForeign
   { mode : toForeignFileMode mode
   , charset : show charset
   }

@@ -24,7 +24,7 @@ import Data.Generic.Rep.Show (genericShow)
 import Data.Time.Duration (Milliseconds)
 import Effect.Aff (Aff)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
-import Foreign (toForeign, Foreign)
+import Foreign (unsafeToForeign, Foreign)
 
 type FilePath = String
 type FileContent = String
@@ -42,7 +42,7 @@ instance showFileMode :: Show FileMode where
 -- | Used to convert a FileMode to a foreign type
 -- | that can be passed into native phantomjs functions.
 toForeignFileMode :: FileMode -> Foreign
-toForeignFileMode = toForeign <<< case _ of
+toForeignFileMode = unsafeToForeign <<< case _ of
   R -> "r"
   W -> "w"
   RW -> "rw"

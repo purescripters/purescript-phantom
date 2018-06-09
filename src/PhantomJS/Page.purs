@@ -32,7 +32,7 @@ import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff, Fiber, forkAff)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
-import Foreign (toForeign, Foreign)
+import Foreign (unsafeToForeign, Foreign)
 
 type URL = String
 type FilePath = String
@@ -78,7 +78,7 @@ instance showRenderFormat :: Show RenderFormat where
 -- | Used to convert RenderFormat to a foreign type
 -- | that can be passed into native phantomjs functions.
 toForeignRenderFormat :: RenderFormat -> Foreign
-toForeignRenderFormat = toForeign <<< case _ of
+toForeignRenderFormat = unsafeToForeign <<< case _ of
   PDF -> "pdf"
   PNG -> "png"
   JPEG -> "jpg"
@@ -113,7 +113,7 @@ instance showPhantomRequest :: Show PhantomRequest where
 -- | that can be passed into native phantomjs functions.
 toForeignRenderSettings :: RenderSettings -> Foreign
 toForeignRenderSettings (RenderSettings { format, quality }) =
-  toForeign
+  unsafeToForeign
     { format: toForeignRenderFormat format
     , quality: quality
     }

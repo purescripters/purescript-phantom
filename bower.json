@@ -20,18 +20,18 @@
     "url": "git://github.com/purescripters/purescript-phantom.git"
   },
   "dependencies": {
-    "purescript-prelude": "#compiler/0.12",
-    "purescript-aff": "#compiler/0.12",
-    "purescript-foreign": "#compiler/0.12",
-    "purescript-generics-rep": "#compiler/0.12",
-    "purescript-datetime": "#compiler/0.12",
-    "purescript-encoding": "cryogenian/purescript-encoding#compiler/0.12",
-    "purescript-nullable": "#compiler/0.12"
+    "purescript-prelude": "^4.0.1",
+    "purescript-aff": "^5.0.0",
+    "purescript-foreign": "^5.0.0",
+    "purescript-generics-rep": "^6.0.0",
+    "purescript-datetime": "^4.0.0",
+    "purescript-encoding": "dgendill/purescript-encoding#compiler/0.12",
+    "purescript-nullable": "^4.0.0"
   },
   "devDependencies": {
-    "purescript-console": "#compiler/0.12",
-    "purescript-psci-support": "#compiler/0.12",
-    "purescript-test-unit": "justinwoo/purescript-test-unit#compiler/0.12",
-    "purescript-debug": "cryogenian/purescript-debug#compiler/0.12"
+    "purescript-console": "^4.1.0",
+    "purescript-psci-support": "^4.0.0",
+    "purescript-test-unit": "^14.0.0",
+    "purescript-debug": "^4.0.0"
   }
 }
