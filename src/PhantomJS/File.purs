@@ -9,8 +9,6 @@
 module PhantomJS.File
   ( FileMode(..)
   , FilePath
-  , PHANTOMJSFS
-  , PhantomFSAff
   , exists
   , remove
   , write
@@ -19,19 +17,17 @@ module PhantomJS.File
   , toForeignFileMode
   ) where
 
-import Control.Monad.Aff (Aff)
-import Control.Monad.Aff.Compat (EffFnAff, fromEffFnAff)
-import Control.Monad.Eff (kind Effect)
-import Data.Foreign (toForeign, Foreign)
-import Data.Generic.Rep (class Generic)
-import Data.Time.Duration (Milliseconds)
 import Prelude
+
+import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Show (genericShow)
+import Data.Time.Duration (Milliseconds)
+import Effect.Aff (Aff)
+import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
+import Foreign (unsafeToForeign, Foreign)
 
 type FilePath = String
 type FileContent = String
-type FSEff e = (phantomjsfs :: PHANTOMJSFS | e)
-type PhantomFSAff e a = Aff (phantomjsfs :: PHANTOMJSFS | e) a
-type ForeignFileMode = Foreign
 
 -- http://phantomjs.org/api/fs/method/open.html
 -- Doesn't look like the + does anything.
@@ -40,47 +36,40 @@ data FileMode = R | W | A | RW
 
 derive instance genericFileMode :: Generic FileMode _
 derive instance eqFileMode :: Eq FileMode
-
 instance showFileMode :: Show FileMode where
-  show R = "r"   -- read         -   (don't create if not exists)
-  show RW = "rw" -- read + write -   (don't create if not exists, overwrite existing)
-  show W = "w"   -- write        -   (create if not exists, overwrite existing)
-  show A = "a"   -- append       -   (create if not exists, append to file)
+  show = genericShow
 
 -- | Used to convert a FileMode to a foreign type
 -- | that can be passed into native phantomjs functions.
 toForeignFileMode :: FileMode -> Foreign
-toForeignFileMode = toForeign <<< show
+toForeignFileMode = unsafeToForeign <<< case _ of
+  R -> "r"
+  W -> "w"
+  RW -> "rw"
+  A -> "a"
 
-foreign import data PHANTOMJSFS :: Effect
+-- | Deletes a file
+remove :: FilePath -> Aff Unit
+remove = fromEffectFnAff <<< remove_
+foreign import remove_ :: FilePath -> EffectFnAff Unit
 
-foreign import exists_ :: forall e. FilePath -> EffFnAff (FSEff e) Boolean
+-- | Checks if a file exists
+exists :: FilePath -> Aff Boolean
+exists = fromEffectFnAff <<< exists_
+foreign import exists_ :: FilePath -> EffectFnAff Boolean
 
-foreign import remove_ :: forall e. FilePath -> EffFnAff (FSEff e) Unit
+-- | Writes to a file
+write :: FilePath -> FileContent -> FileMode -> Aff Unit
+write fp c fm = fromEffectFnAff $ write_ fp c (toForeignFileMode fm)
+foreign import write_ :: FilePath -> FileContent -> Foreign -> EffectFnAff Unit
 
-foreign import write_ :: forall e. FilePath -> FileContent -> ForeignFileMode -> EffFnAff (FSEff e) Unit
+-- | Reads from a file
+read :: FilePath -> Aff String
+read = fromEffectFnAff <<< read_
+foreign import read_ :: FilePath -> EffectFnAff String
 
-foreign import read_ :: forall e. FilePath -> EffFnAff (FSEff e) String
-
-foreign import lastModified_ :: forall e. FilePath -> EffFnAff (FSEff e) Milliseconds
-
--- Deletes a file
-remove :: forall e. FilePath -> Aff (FSEff e) Unit
-remove = fromEffFnAff <<< remove_
-
--- Checks if a file exists
-exists :: forall e. FilePath -> Aff (FSEff e) Boolean
-exists = fromEffFnAff <<< exists_
-
--- Writes to a file
-write :: forall e. FilePath -> FileContent -> FileMode -> Aff (FSEff e) Unit
-write fp c fm = fromEffFnAff $ write_ fp c (toForeignFileMode fm)
-
--- Reads from a file
-read :: forall e. FilePath -> Aff (FSEff e) String
-read = fromEffFnAff <<< read_
-
--- Returns the last modified date of a file in milliseconds.  If the file
--- doesn't exist, an error is thrown.
-lastModified :: forall e. FilePath -> Aff (FSEff e) Milliseconds
-lastModified = fromEffFnAff <<< lastModified_
+-- | Returns the last modified date of a file in milliseconds.  If the file
+-- | doesn't exist, an error is thrown.
+lastModified :: FilePath -> Aff Milliseconds
+lastModified = fromEffectFnAff <<< lastModified_
+foreign import lastModified_ :: FilePath -> EffectFnAff Milliseconds

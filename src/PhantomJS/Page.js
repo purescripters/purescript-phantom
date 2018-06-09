@@ -91,8 +91,13 @@ exports.injectJs_ = function(page) {
 
 
 exports.customHeaders_ = function(page) {
-  return function(foreignObj) {
+  return function(foreignArr) {
     return function(error, success) {
+      var foreignObj = {}, i, item;
+      for (i = 0; i < foreignArr.length; i++) {
+        item = foreignArr[i];
+        foreignObj[item.key] = item.value;
+      }
       page.customHeaders = foreignObj;
       success(page);
       return alwaysCancel;
@@ -175,7 +180,7 @@ exports.onResourceRequestedFor_ = function(page) {
 
 exports.silencePageErrors_ = function(page) {
 
-  phantomPageGlobal.errors[page.phantomUniqueId] = phantomPageGlobal.errors[page.phantomUniqueId] || []; 
+  phantomPageGlobal.errors[page.phantomUniqueId] = phantomPageGlobal.errors[page.phantomUniqueId] || [];
 
   return function(error, success) {
     // http://phantomjs.org/api/webpage/handler/on-error.html

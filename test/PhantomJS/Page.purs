@@ -2,32 +2,26 @@ module Test.PhantomJS.Page
   ( pageTests
   ) where
 
-import PhantomJS.Page
+import Prelude
 
-import Control.Monad.Aff (Aff, attempt, error, killFiber)
-import Control.Monad.Aff.Console (CONSOLE, log)
+import Control.Monad.Except (runExcept)
+import Effect.Aff (attempt, error, killFiber)
+import Effect.Console (log)
+import Effect.Class (liftEffect)
 import Data.Array (length)
-import Data.Either (isRight, isLeft)
-import PhantomJS.File (PHANTOMJSFS, exists, remove)
-import PhantomJS.Phantom (PHANTOMJS)
-import Prelude (bind, discard, ($), (&&), (<>), (==), (>))
+import Data.Either (isRight, isLeft, Either(..))
+import Foreign (readInt)
+import PhantomJS.File (exists, remove)
+import PhantomJS.Page (RenderSettings, clearPageErrors, createPage, evaluate, getSilencedErrors, injectJs, jpeg, open, png, render, silencePageErrors, wait)
 import Test.PhantomJS.Paths (getTempFolder, getTestHtmlFile, getTestHtmlFileWithErrors)
-import Test.PhantomJS.Phantom (liftEff)
 import Test.Unit (TestSuite, describe, it)
 import Test.Unit.Assert (assert)
 
-testImageRender :: forall e.
-  String
-  -> RenderSettings
-     -> TestSuite
-         ( phantomjsfs :: PHANTOMJSFS
-         , phantomjs :: PHANTOMJS
-         | e
-         )
+testImageRender :: String -> RenderSettings -> TestSuite
 testImageRender filename renderSettings = do
   it ("should render test.html to " <> filename) do
-    tempFolder <- liftEff $ getTempFolder
-    testHtmlFile <- liftEff $ getTestHtmlFile
+    tempFolder <- liftEffect $ getTempFolder
+    testHtmlFile <- liftEffect $ getTestHtmlFile
 
     let image = tempFolder <> filename
     _ <- attempt $ remove image
@@ -38,16 +32,16 @@ testImageRender filename renderSettings = do
     _ <- attempt $ remove image
     assert (tempFolder <> filename <> " is not there.") fileExists
 
-pageTests :: forall e. TestSuite (console :: CONSOLE, phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | e)
+pageTests :: TestSuite
 pageTests = do
   describe "PhantomJS.Page" do
     describe "open" do
       it "should open test.html" do
-        testHtmlFile <- liftEff $ getTestHtmlFile
+        testHtmlFile <- liftEffect $ getTestHtmlFile
         p <- createPage
         u <- attempt $ open p testHtmlFile
-        assert "open returned failure case" (isRight u)    
-    
+        assert "open returned failure case" (isRight u)
+
       it "should fail when local asset not found." do
         p <- createPage
         u <- attempt $ open p "test-not-found.html"
@@ -60,31 +54,32 @@ pageTests = do
 
     describe "inject and evaluate" do
       it "should inject test.js into page" do
-        testHtmlFile <- liftEff $ getTestHtmlFile
+        testHtmlFile <- liftEffect $ getTestHtmlFile
         p <- createPage
         _ <- open p testHtmlFile
         _ <- injectJs p "test/assets/return28.js"
-        r <- evaluate p "return28" :: forall e. Aff (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | e) Int
-        assert "did not return value 28" (r == 28)
+        r <- evaluate p "return28"
+
+        assert "did not return value 28" (runExcept (readInt r) == Right 28)
 
       it "should fail injecting a non-existant script." do
-        testHtmlFile <- liftEff $ getTestHtmlFile
+        testHtmlFile <- liftEffect $ getTestHtmlFile
         p <- createPage
         _ <- open p testHtmlFile
         u <- attempt $ injectJs p "does-not-exists.js"
         assert "succeeded to inject the file." (isLeft u)
 
       it "should fail running a non-existant function." do
-        testHtmlFile <- liftEff $ getTestHtmlFile
+        testHtmlFile <- liftEffect $ getTestHtmlFile
         p <- createPage
         _ <- open p testHtmlFile
         _ <- injectJs p "test/assets/return28.js"
-        r <- attempt $ evaluate p "doesnotexist" :: forall e. Aff (phantomjsfs :: PHANTOMJSFS, phantomjs :: PHANTOMJS | e) Int
+        r <- attempt $ evaluate p "doesnotexist"
         assert "did run doesnotexist()" (isLeft r)
 
     describe "silencePageErrors, getSilencedErrors, clearPageErrors" do
       it "should open test-with-errors.html and collect the errors on the page" do
-        testHtmlFile <- liftEff $ getTestHtmlFileWithErrors
+        testHtmlFile <- liftEffect $ getTestHtmlFileWithErrors
         p1 <- createPage
         p2 <- createPage
 
@@ -96,7 +91,7 @@ pageTests = do
         killFiber (error "stopping silence") errorFiber1
         killFiber (error "stopping silence") errorFiber2
 
-        log ""
+        liftEffect $ log ""
         wait 1100
 
         errors1 <- getSilencedErrors p1
@@ -113,4 +108,3 @@ pageTests = do
         clearedErrors2 <- getSilencedErrors p2
 
         assert "did not clear stored errors" $ clearedErrors1 == clearedErrors2 && clearedErrors1 == []
-
